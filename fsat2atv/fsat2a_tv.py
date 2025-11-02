@@ -3,22 +3,22 @@
 #
 #  gu_tv.py
 #  
-#  Copyright The GOLDS-UFSC Telemetry Viewer Contributors.
+#  Copyright The FloripaSat-2A Telemetry Viewer Contributors.
 #  
-#  This file is part of GOLDS-UFSC Telemetry Viewer.
+#  This file is part of FloripaSat-2A Telemetry Viewer.
 #
-#  GOLDS-UFSC Telemetry Viewer is free software; you can redistribute it
+#  FloripaSat-2A Telemetry Viewer is free software; you can redistribute it
 #  and/or modify it under the terms of the GNU General Public License as
 #  published by the Free Software Foundation, either version 3 of the
 #  License, or (at your option) any later version.
 #  
-#  GOLDS-UFSC Telemetry Viewer is distributed in the hope that it will be useful,
+#  FloripaSat-2A Telemetry Viewer is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
 #  
 #  You should have received a copy of the GNU General Public
-#  License along with GOLDS-UFSC Telemetry Viewer; if not, see
+#  License along with FloripaSat-2A Telemetry Viewer; if not, see
 #  <http://www.gnu.org/licenses/>.
 #  
 #
@@ -32,22 +32,22 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
 
-import gutv.version
-import gutv.convert
+import fsat2atv.version
+import fsat2atv.convert
 
 # UI File
-_UI_FILE_LOCAL                  = os.path.abspath(os.path.dirname(__file__)) + '/data/ui/gutv.glade'
-_UI_FILE_LINUX_SYSTEM           = '/usr/share/gutv/gutv.glade'
+_UI_FILE_LOCAL                  = os.path.abspath(os.path.dirname(__file__)) + '/data/ui/fsat2atv.glade'
+_UI_FILE_LINUX_SYSTEM           = '/usr/share/fsat2atv/fsat2atv.glade'
 
 # Icon File
-_ICON_FILE_LOCAL                = os.path.abspath(os.path.dirname(__file__)) + '/data/img/gutv_256x256.png'
-_ICON_FILE_LINUX_SYSTEM         = '/usr/share/icons/gutv_256x256.png'
+_ICON_FILE_LOCAL                = os.path.abspath(os.path.dirname(__file__)) + '/data/img/fsat2atv_256x256.png'
+_ICON_FILE_LINUX_SYSTEM         = '/usr/share/icons/fsat2atv_256x256.png'
 
 # Logo File
 _LOGO_FILE_LOCAL                = os.path.abspath(os.path.dirname(__file__)) + '/data/img/spacelab-logo-full-400x200.png'
-_LOGO_FILE_LINUX_SYSTEM         = '/usr/share/spacelab_decoder/spacelab-logo-full-400x200.png'
+_LOGO_FILE_LINUX_SYSTEM         = '/usr/share/fsat2atv/spacelab-logo-full-400x200.png'
 
-class GUTV:
+class FSat2ATV:
 
     def __init__(self):
         """
@@ -225,37 +225,12 @@ class GUTV:
         self.label_ant_mp4_dep_stop                 = self.builder.get_object("label_ant_mp4_dep_stop")
         self.label_ant_mp4_dep_sys                  = self.builder.get_object("label_ant_mp4_dep_sys")
 
-        # EDC 1
-        self.label_edc1_date                        = self.builder.get_object("label_edc1_date")
-        self.label_edc1_time                        = self.builder.get_object("label_edc1_time")
-        self.label_edc1_elapsed_time                = self.builder.get_object("label_edc1_elapsed_time")
-        self.label_edc1_volt                        = self.builder.get_object("label_edc1_volt")
-        self.label_edc1_curr_dig                    = self.builder.get_object("label_edc1_curr_dig")
-        self.label_edc1_curr_ana                    = self.builder.get_object("label_edc1_curr_ana")
-        self.label_edc1_temp                        = self.builder.get_object("label_edc1_temp")
-        self.label_edc1_pll_sync                    = self.builder.get_object("label_edc1_pll_sync")
-        self.label_edc1_adc_rms_lvl                 = self.builder.get_object("label_edc1_adc_rms_lvl")
-        self.label_edc1_tot_ptt_pkg                 = self.builder.get_object("label_edc1_tot_ptt_pkg")
-        self.label_edc1_ptt_dec_ch                  = self.builder.get_object("label_edc1_ptt_dec_ch")
-        self.label_edc1_mss_err_count               = self.builder.get_object("label_edc1_mss_err_count")
-
-        # EDC 2
-        self.label_edc2_date                        = self.builder.get_object("label_edc2_date")
-        self.label_edc2_time                        = self.builder.get_object("label_edc2_time")
-        self.label_edc2_elapsed_time                = self.builder.get_object("label_edc2_elapsed_time")
-        self.label_edc2_volt                        = self.builder.get_object("label_edc2_volt")
-        self.label_edc2_curr_dig                    = self.builder.get_object("label_edc2_curr_dig")
-        self.label_edc2_curr_ana                    = self.builder.get_object("label_edc2_curr_ana")
-        self.label_edc2_temp                        = self.builder.get_object("label_edc2_temp")
-        self.label_edc2_pll_sync                    = self.builder.get_object("label_edc2_pll_sync")
-        self.label_edc2_adc_rms_lvl                 = self.builder.get_object("label_edc2_adc_rms_lvl")
-        self.label_edc2_tot_ptt_pkg                 = self.builder.get_object("label_edc2_tot_ptt_pkg")
-        self.label_edc2_ptt_dec_ch                  = self.builder.get_object("label_edc2_ptt_dec_ch")
-        self.label_edc2_mss_err_count               = self.builder.get_object("label_edc2_mss_err_count")
+        # LoRa Payload
+        # TODO
 
         # About dialog
-        self.aboutdialog = self.builder.get_object("aboutdialog_gutv")
-        self.aboutdialog.set_version(gutv.version.__version__)
+        self.aboutdialog = self.builder.get_object("aboutdialog_fsat2atv")
+        self.aboutdialog.set_version(fsat2atv.version.__version__)
         if os.path.isfile(_LOGO_FILE_LOCAL):
             self.aboutdialog.set_logo(GdkPixbuf.Pixbuf.new_from_file(_LOGO_FILE_LOCAL))
         else:
@@ -730,81 +705,6 @@ class GUTV:
                 self.label_ant_mp4_dep_sys.set_text("Activated")
             else:
                 self.label_ant_mp4_dep_sys.set_text("Deactivated")
-
-        if "edc1_ts" in data:
-            self.label_edc1_date.set_text(datetime.datetime.fromtimestamp(int(data["edc1_ts"])).strftime('%Y/%m/%d'))
-            self.label_edc1_time.set_text(datetime.datetime.fromtimestamp(int(data["edc1_ts"])).strftime('%H:%M:%S'))
-
-        if "edc1_elapsed_tm" in data:
-            self.label_edc1_elapsed_time.set_text(data["edc1_elapsed_tm"] + " " + "sec")
-
-        if "edc1_volt" in data:
-            self.label_edc1_volt.set_text(data["edc1_volt"] + " " + "mV")
-
-        if "edc1_curr_dig" in data:
-            self.label_edc1_curr_dig.set_text(data["edc1_curr_dig"] + " " + "mA")
-
-        if "edc1_curr_ana" in data:
-            self.label_edc1_curr_ana.set_text(data["edc1_curr_ana"] + " " + "mA")
-
-        if "edc1_temp" in data:
-            self.label_edc1_temp.set_text(data["edc1_temp"] + " " + "°C")
-
-        if "edc1_pll_sync" in data:
-            if int(data["edc1_pll_sync"] == 0):
-                self.label_edc1_pll_sync.set_text("Disabled")
-            elif int(data["edc1_pll_sync"] == 0):
-                self.label_edc1_pll_sync.set_text("Enabled")
-            else:
-                self.label_edc1_pll_sync.set_text("Unknown")
-
-        if "edc1_adc_rms_lvl" in data:
-            self.label_edc1_adc_rms_lvl.set_text(data["edc1_adc_rms_lvl"])
-
-        if "edc1_tot_ptt_pkg" in data:
-            self.label_edc1_tot_ptt_pkg.set_text(data["edc1_tot_ptt_pkg"])
-
-        if "edc1_ptt_dec_ch" in data:
-            self.label_edc1_ptt_dec_ch.set_text(data["edc1_ptt_dec_ch"])
-
-        if "edc1_mss_err_count" in data:
-            self.label_edc1_mss_err_count.set_text(data["edc1_mss_err_count"])
-
-        if "edc2_ts" in data:
-            self.label_edc1_date.set_text(datetime.datetime.fromtimestamp(int(data["edc2_ts"])).strftime('%Y/%m/%d'))
-            self.label_edc1_time.set_text(datetime.datetime.fromtimestamp(int(data["edc2_ts"])).strftime('%H:%M:%S'))
-
-        if "edc2_elapsed_tm" in data:
-            self.label_edc1_elapsed_time.set_text(data["edc2_elapsed_tm"] + " " + "sec")
-
-        if "edc2_volt" in data:
-            self.label_edc1_volt.set_text(data["edc2_volt"] + " " + "mV")
-
-        if "edc2_curr_dig" in data:
-            self.label_edc1_curr_dig.set_text(data["edc2_curr_dig"] + " " + "mA")
-
-        if "edc2_curr_ana" in data:
-            self.label_edc1_curr_ana.set_text(data["edc2_curr_ana"] + " " + "mA")
-
-        if "edc2_temp" in data:
-            self.label_edc1_temp.set_text(data["edc2_temp"] + " " + "°C")
-
-        if "edc2_pll_sync" in data:
-            if int(data["edc2_pll_sync"] == 0):
-                self.label_edc1_pll_sync.set_text("Disabled")
-            elif int(data["edc2_pll_sync"] == 0):
-                self.label_edc1_pll_sync.set_text("Enabled")
-            else:
-                self.label_edc1_pll_sync.set_text("Unknown")
-
-        if "edc2_adc_rms_lvl" in data:
-            self.label_edc1_adc_rms_lvl.set_text(data["edc2_adc_rms_lvl"])
-
-        if "edc2_tot_ptt_pkg" in data:
-            self.label_edc1_tot_ptt_pkg.set_text(data["edc2_tot_ptt_pkg"])
-
-        if "edc2_ptt_dec_ch" in data:
-            self.label_edc1_ptt_dec_ch.set_text(data["edc2_ptt_dec_ch"])
 
         if "edc2_mss_err_count" in data:
             self.label_edc1_mss_err_count.set_text(data["edc2_mss_err_count"])

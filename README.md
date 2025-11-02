@@ -1,18 +1,18 @@
 <h1 align="center">
-    GOLDS-UFSC TELEMETRY VIEWER
+    FLORIPASAT-2A TELEMETRY VIEWER
     <br>
 </h1>
 
-<h4 align="center">Telemetry visualizer software for the GOLDS-UFSC mission.</h4>
+<h4 align="center">Telemetry visualizer software for the FloripaSat-2A mission.</h4>
 
 <p align="center">
-    <a href="https://github.com/spacelab-ufsc/gutv">
+    <a href="https://github.com/spacelab-ufsc/fsat2atv">
         <img src="https://img.shields.io/badge/status-development-green?style=for-the-badge">
     </a>
-    <a href="https://github.com/spacelab-ufsc/gutv/releases">
-        <img alt="GitHub commits since latest release (by date)" src="https://img.shields.io/github/commits-since/spacelab-ufsc/gutv/latest?style=for-the-badge">
+    <a href="https://github.com/spacelab-ufsc/fsat2atv/releases">
+        <img alt="GitHub commits since latest release (by date)" src="https://img.shields.io/github/commits-since/spacelab-ufsc/fsat2atv/latest?style=for-the-badge">
     </a>
-    <a href="https://github.com/spacelab-ufsc/gutv/blob/main/LICENSE">
+    <a href="https://github.com/spacelab-ufsc/fsat2atv/blob/main/LICENSE">
         <img src="https://img.shields.io/badge/license-GPL3-yellow?style=for-the-badge">
     </a>
 </p>
@@ -27,7 +27,7 @@
 
 # Overview
 
-The GOLDS-UFSC Telemetry Viewer (GUTV) is a software to visualize and manage the telemetry data transmitted by the GOLDS-UFSC satellite.
+The FloripaSat-2A Telemetry Viewer (FSat2ATV) is a software to visualize and manage the telemetry data transmitted by the FloripaSat-2A satellite.
 
 Below, there is an image of the main window of the software:
 

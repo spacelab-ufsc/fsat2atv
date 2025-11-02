@@ -3,22 +3,22 @@
 #
 #  setup.py
 #  
-#  Copyright The GOLDS-UFSC Telemetry Viewer Contributors.
+#  Copyright The FloripaSat-2A Telemetry Viewer Contributors.
 #  
-#  This file is part of GOLDS-UFSC Telemetry Viewer.
+#  This file is part of FloripaSat-2A Telemetry Viewer.
 #
-#  GOLDS-UFSC Telemetry Viewer is free software; you can redistribute it
+#  FloripaSat-2A Telemetry Viewer is free software; you can redistribute it
 #  and/or modify it under the terms of the GNU General Public License as
 #  published by the Free Software Foundation, either version 3 of the
 #  License, or (at your option) any later version.
 #  
-#  GOLDS-UFSC Telemetry Viewer is distributed in the hope that it will be useful,
+#  FloripaSat-2A Telemetry Viewer is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
 #  
 #  You should have received a copy of the GNU General Public
-#  License along with GOLDS-UFSC Telemetry Viewer; if not, see
+#  License along with FloripaSat-2A Telemetry Viewer; if not, see
 #  <http://www.gnu.org/licenses/>.
 #  
 #
@@ -28,21 +28,21 @@ import os
 
 from sphinx.setup_command import BuildDoc
 
-exec(open('gutv/version.py').read())
+exec(open('fsat2atv/version.py').read())
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name                            = "golds_ufsc_telemetry_viewer",
+    name                            = "floripasat2a_telemetry_viewer",
     version                         = __version__,
     author                          = "Gabriel Mariano Marcelino",
     author_email                    = "gabriel.mm8@gmail.com",
     maintainer                      = "Gabriel Mariano Marcelino",
     maintainer_email                = "gabriel.mm8@gmail.com",
-    url                             = "https://github.com/spacelab-ufsc/gutv",
+    url                             = "https://github.com/spacelab-ufsc/fsat2atv",
     license                         = "GPLv3",
-    description                     = "GOLDS-UFSC Telemetry Viewer",
+    description                     = "FloripaSat-2A Telemetry Viewer",
     long_description                = long_description,
     long_description_content_type   = "text/markdown",
     platforms                       = ["Linux"],
@@ -60,19 +60,19 @@ setuptools.setup(
         "Topic :: Education",
         "Topic :: Scientific/Engineering",
         ],
-    download_url                    = "https://github.com/spacelab-ufsc/gutv/releases",
+    download_url                    = "https://github.com/spacelab-ufsc/fsat2atv/releases",
     packages                        = setuptools.find_packages(),
     install_requires                = ['gi'],
     entry_points                    = {
         'gui_scripts': [
-            'golds-ufsc-tv = gutv.__main__:main'
+            'golds-ufsc-tv = fsat2atv.__main__:main'
             ]
         },
     data_files                      = [
-        ('share/icons/', ['gutv/data/img/gutv_256x256.png']),
-        ('share/applications/', ['gutv.desktop']),
-        ('share/gutv/', ['gutv/data/ui/gutv.glade']),
-        ('share/gutv/', ['gutv/data/img/spacelab-logo-full-400x200.png']),
+        ('share/icons/', ['fsat2atv/data/img/fsat2atv_256x256.png']),
+        ('share/applications/', ['fsat2atv.desktop']),
+        ('share/fsat2atv/', ['fsat2atv/data/ui/fsat2atv.glade']),
+        ('share/fsat2atv/', ['fsat2atv/data/img/spacelab-logo-full-400x200.png']),
         ],
     cmdclass                        = {'build_sphinx': BuildDoc},
 )
