@@ -4402,254 +4402,257 @@
                 <property name="margin-end">10</property>
                 <property name="margin-top">5</property>
                 <property name="margin-bottom">5</property>
+                <property name="orientation">vertical</property>
                 <property name="spacing">10</property>
                 <child>
-                  <!-- n-columns=2 n-rows=12 -->
-                  <object class="GtkGrid">
+                  <object class="GtkFrame">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="row-spacing">5</property>
-                    <property name="column-spacing">10</property>
+                    <property name="halign">start</property>
+                    <property name="valign">start</property>
+                    <property name="label-xalign">0.05000000074505806</property>
                     <child>
+                      <object class="GtkAlignment">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="left-padding">12</property>
+                        <child>
+                          <!-- n-columns=2 n-rows=7 -->
+                          <object class="GtkGrid">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-end">10</property>
+                            <property name="margin-bottom">5</property>
+                            <property name="row-spacing">5</property>
+                            <property name="column-spacing">10</property>
+                            <property name="column-homogeneous">True</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Timestamp:</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_lora_fsat2a_ts">
+                                <property name="width-request">150</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">1970/01/01 - 00:00:00</property>
+                                <attributes>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">1</property>
+                                <property name="top-attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">ID:</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Packet Counter:</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Last RSSI:</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">4</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Temperature:</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Last SNR:</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">5</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Last Frequency Error:</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">6</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_lora_fsat2a_id">
+                                <property name="width-request">150</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">0</property>
+                                <attributes>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">1</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_lora_fsat2a_pkt_cnt">
+                                <property name="width-request">150</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">0</property>
+                                <attributes>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">1</property>
+                                <property name="top-attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_lora_fsat2a_temp">
+                                <property name="width-request">150</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">0 °C</property>
+                                <attributes>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">1</property>
+                                <property name="top-attach">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_lora_fsat2a_rssi">
+                                <property name="width-request">150</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">0 dB</property>
+                                <attributes>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">1</property>
+                                <property name="top-attach">4</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_lora_fsat2a_snr">
+                                <property name="width-request">150</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">0 dB</property>
+                                <attributes>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">1</property>
+                                <property name="top-attach">5</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_lora_fsat2a_freq_err">
+                                <property name="width-request">150</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">0 Hz</property>
+                                <attributes>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">1</property>
+                                <property name="top-attach">6</property>
+                              </packing>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="halign">start</property>
-                        <property name="label" translatable="yes">Timestamp:</property>
-                        <attributes>
-                          <attribute name="weight" value="bold"/>
-                          <attribute name="scale" value="1.5"/>
-                        </attributes>
+                        <property name="label" translatable="yes">FloripaSat-2A</property>
                       </object>
-                      <packing>
-                        <property name="left-attach">0</property>
-                        <property name="top-attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label_lora_timestamp">
-                        <property name="width-request">150</property>
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">1970/01/01 -00:00:00</property>
-                        <attributes>
-                          <attribute name="scale" value="1.5"/>
-                        </attributes>
-                      </object>
-                      <packing>
-                        <property name="left-attach">1</property>
-                        <property name="top-attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="halign">start</property>
-                        <property name="label" translatable="yes">:</property>
-                        <attributes>
-                          <attribute name="weight" value="bold"/>
-                          <attribute name="scale" value="1.5"/>
-                        </attributes>
-                      </object>
-                      <packing>
-                        <property name="left-attach">0</property>
-                        <property name="top-attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label_edc1_time">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">00:00:00</property>
-                        <attributes>
-                          <attribute name="scale" value="1.5"/>
-                        </attributes>
-                      </object>
-                      <packing>
-                        <property name="left-attach">1</property>
-                        <property name="top-attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="halign">start</property>
-                        <property name="label" translatable="yes">Elapsed Time:</property>
-                        <attributes>
-                          <attribute name="weight" value="bold"/>
-                          <attribute name="scale" value="1.5"/>
-                        </attributes>
-                      </object>
-                      <packing>
-                        <property name="left-attach">0</property>
-                        <property name="top-attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label_edc1_elapsed_time">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">0 sec</property>
-                        <attributes>
-                          <attribute name="scale" value="1.5"/>
-                        </attributes>
-                      </object>
-                      <packing>
-                        <property name="left-attach">1</property>
-                        <property name="top-attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="halign">start</property>
-                        <property name="label" translatable="yes">Voltage:</property>
-                        <attributes>
-                          <attribute name="weight" value="bold"/>
-                          <attribute name="scale" value="1.5"/>
-                        </attributes>
-                      </object>
-                      <packing>
-                        <property name="left-attach">0</property>
-                        <property name="top-attach">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label_edc1_volt">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">0 mV</property>
-                        <attributes>
-                          <attribute name="scale" value="1.5"/>
-                        </attributes>
-                      </object>
-                      <packing>
-                        <property name="left-attach">1</property>
-                        <property name="top-attach">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="halign">start</property>
-                        <property name="label" translatable="yes">Current (Digital):</property>
-                        <attributes>
-                          <attribute name="weight" value="bold"/>
-                          <attribute name="scale" value="1.5"/>
-                        </attributes>
-                      </object>
-                      <packing>
-                        <property name="left-attach">0</property>
-                        <property name="top-attach">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label_edc1_curr_dig">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">0 mA</property>
-                        <attributes>
-                          <attribute name="scale" value="1.5"/>
-                        </attributes>
-                      </object>
-                      <packing>
-                        <property name="left-attach">1</property>
-                        <property name="top-attach">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="halign">start</property>
-                        <property name="label" translatable="yes">Current (Analog):</property>
-                        <attributes>
-                          <attribute name="weight" value="bold"/>
-                          <attribute name="scale" value="1.5"/>
-                        </attributes>
-                      </object>
-                      <packing>
-                        <property name="left-attach">0</property>
-                        <property name="top-attach">5</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label_edc1_curr_ana">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">0 mA</property>
-                        <attributes>
-                          <attribute name="scale" value="1.5"/>
-                        </attributes>
-                      </object>
-                      <packing>
-                        <property name="left-attach">1</property>
-                        <property name="top-attach">5</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="halign">start</property>
-                        <property name="label" translatable="yes">Temperature:</property>
-                        <attributes>
-                          <attribute name="weight" value="bold"/>
-                          <attribute name="scale" value="1.5"/>
-                        </attributes>
-                      </object>
-                      <packing>
-                        <property name="left-attach">0</property>
-                        <property name="top-attach">6</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label_edc1_temp">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">0 °C</property>
-                        <attributes>
-                          <attribute name="scale" value="1.5"/>
-                        </attributes>
-                      </object>
-                      <packing>
-                        <property name="left-attach">1</property>
-                        <property name="top-attach">6</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
                     </child>
                   </object>
                   <packing>
@@ -4659,7 +4662,292 @@
                   </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <object class="GtkFrame">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="valign">start</property>
+                    <property name="label-xalign">0.05000000074505806</property>
+                    <child>
+                      <object class="GtkAlignment">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="left-padding">12</property>
+                        <child>
+                          <!-- n-columns=2 n-rows=8 -->
+                          <object class="GtkGrid">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-end">10</property>
+                            <property name="margin-bottom">5</property>
+                            <property name="row-spacing">5</property>
+                            <property name="column-spacing">10</property>
+                            <property name="column-homogeneous">True</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Timestamp:</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_lora_fsat2b_ts">
+                                <property name="width-request">150</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">1970/01/01 - 00:00:00</property>
+                                <attributes>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">1</property>
+                                <property name="top-attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">ID:</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Packet Counter:</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Temperature:</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Last RSSI:</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">4</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Last SNR:</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">5</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Last Frequency Error:</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">6</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Battery Voltage:</property>
+                                <attributes>
+                                  <attribute name="weight" value="bold"/>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">0</property>
+                                <property name="top-attach">7</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_lora_fsat2b_id">
+                                <property name="width-request">150</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">0</property>
+                                <attributes>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">1</property>
+                                <property name="top-attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_lora_fsat2b_pkt_cnt">
+                                <property name="width-request">150</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">0</property>
+                                <attributes>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">1</property>
+                                <property name="top-attach">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_lora_fsat2b_temp">
+                                <property name="width-request">150</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">0 °C</property>
+                                <attributes>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">1</property>
+                                <property name="top-attach">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_lora_fsat2b_rssi">
+                                <property name="width-request">150</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">0 dB</property>
+                                <attributes>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">1</property>
+                                <property name="top-attach">4</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_lora_fsat2b_snr">
+                                <property name="width-request">150</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">0 dB</property>
+                                <attributes>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">1</property>
+                                <property name="top-attach">5</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_lora_fsat2b_freq_err">
+                                <property name="width-request">150</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">0 Hz</property>
+                                <attributes>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">1</property>
+                                <property name="top-attach">6</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_lora_fsat2b_bat_volt">
+                                <property name="width-request">150</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">0 mV</property>
+                                <attributes>
+                                  <attribute name="scale" value="1.5"/>
+                                </attributes>
+                              </object>
+                              <packing>
+                                <property name="left-attach">1</property>
+                                <property name="top-attach">7</property>
+                              </packing>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">FloripaSat-2B</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
                 </child>
               </object>
               <packing>

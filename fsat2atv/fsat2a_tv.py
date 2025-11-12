@@ -204,29 +204,23 @@ class FSat2ATV:
         self.label_ttc_radio2_tx_count              = self.builder.get_object("label_ttc_radio2_tx_count")
         self.label_ttc_radio2_rx_count              = self.builder.get_object("label_ttc_radio2_rx_count")
 
-        # Antenna
-        self.label_ant_temp                         = self.builder.get_object("label_ant_temp")
-        self.label_ant_temp                         = self.builder.get_object("label_ant_temp")
-        self.label_ant_deployment_exec              = self.builder.get_object("label_ant_deployment_exec")
-        self.label_ant_deployment_count             = self.builder.get_object("label_ant_deployment_count")
-        self.label_ant_indep_burn                   = self.builder.get_object("label_ant_indep_burn")
-        self.label_ant_ignore_switches              = self.builder.get_object("label_ant_ignore_switches")
-        self.label_ant_armed                        = self.builder.get_object("label_ant_armed")
-        self.label_ant_mp1_deployed                 = self.builder.get_object("label_ant_mp1_deployed")
-        self.label_ant_mp1_dep_stop                 = self.builder.get_object("label_ant_mp1_dep_stop")
-        self.label_ant_mp1_dep_sys                  = self.builder.get_object("label_ant_mp1_dep_sys")
-        self.label_ant_mp2_deployed                 = self.builder.get_object("label_ant_mp2_deployed")
-        self.label_ant_mp2_dep_stop                 = self.builder.get_object("label_ant_mp2_dep_stop")
-        self.label_ant_mp2_dep_sys                  = self.builder.get_object("label_ant_mp2_dep_sys")
-        self.label_ant_mp3_deployed                 = self.builder.get_object("label_ant_mp3_deployed")
-        self.label_ant_mp3_dep_stop                 = self.builder.get_object("label_ant_mp3_dep_stop")
-        self.label_ant_mp3_dep_sys                  = self.builder.get_object("label_ant_mp3_dep_sys")
-        self.label_ant_mp4_deployed                 = self.builder.get_object("label_ant_mp4_deployed")
-        self.label_ant_mp4_dep_stop                 = self.builder.get_object("label_ant_mp4_dep_stop")
-        self.label_ant_mp4_dep_sys                  = self.builder.get_object("label_ant_mp4_dep_sys")
-
         # LoRa Payload
-        # TODO
+        self.label_lora_fsat2a_ts                   = self.builder.get_object("label_lora_fsat2a_ts")
+        self.label_lora_fsat2a_id                   = self.builder.get_object("label_lora_fsat2a_id")
+        self.label_lora_fsat2a_pkt_cnt              = self.builder.get_object("label_lora_fsat2a_pkt_cnt")
+        self.label_lora_fsat2a_temp                 = self.builder.get_object("label_lora_fsat2a_temp")
+        self.label_lora_fsat2a_rssi                 = self.builder.get_object("label_lora_fsat2a_rssi")
+        self.label_lora_fsat2a_snr                  = self.builder.get_object("label_lora_fsat2a_snr")
+        self.label_lora_fsat2a_freq_err             = self.builder.get_object("label_lora_fsat2a_freq_err")
+
+        self.label_lora_fsat2b_ts                   = self.builder.get_object("label_lora_fsat2b_ts")
+        self.label_lora_fsat2b_id                   = self.builder.get_object("label_lora_fsat2b_id")
+        self.label_lora_fsat2b_pkt_cnt              = self.builder.get_object("label_lora_fsat2b_pkt_cnt")
+        self.label_lora_fsat2b_temp                 = self.builder.get_object("label_lora_fsat2b_temp")
+        self.label_lora_fsat2b_rssi                 = self.builder.get_object("label_lora_fsat2b_rssi")
+        self.label_lora_fsat2b_snr                  = self.builder.get_object("label_lora_fsat2b_snr")
+        self.label_lora_fsat2b_freq_err             = self.builder.get_object("label_lora_fsat2b_freq_err")
+        self.label_lora_fsat2b_bat_volt             = self.builder.get_object("label_lora_fsat2b_bat_volt")
 
         # About dialog
         self.aboutdialog = self.builder.get_object("aboutdialog_fsat2atv")
@@ -607,107 +601,50 @@ class FSat2ATV:
             self.label_obdh_op_time_last_reading.set_text(datetime.datetime.fromtimestamp(int(data["obdh_sensor_read_ts"])).strftime('%H:%M:%S'))
 
         if "ttc_radio1_temp" in data:
-            self.label_ttc_radio2_temp.set_text(str((int(data["ttc_radio1_temp"]) - 273)) + " " + "°C")
+            self.label_ttc_radio2_temp.set_text(str(float(data["ttc_radio1_temp"])) + " " + "°C")
 
-        if "ant_temp" in data:
-            self.label_ant_temp.set_text(str((int(data["ant_temp"]) - 273)) + " " + "°C")
+        if "lora_fsat2a_sat_id" in data:
+            self.label_lora_fsat2a_id.set_text(str(int(data["lora_fsat2a_sat_id"])))
 
-        if "ant_status" in data:
-            ant_stat = int(data["ant_status"])
-            ant_mp1_deployed    = (ant_stat >> 15) & 0x0001
-            ant_mp1_dep_stop    = (ant_stat >> 14) & 0x0001
-            ant_mp1_dep_sys     = (ant_stat >> 13) & 0x0001
-            ant_mp2_deployed    = (ant_stat >> 11) & 0x0001
-            ant_mp2_dep_stop    = (ant_stat >> 10) & 0x0001
-            ant_mp2_dep_sys     = (ant_stat >> 9) & 0x0001
-            ant_mp3_deployed    = (ant_stat >> 7) & 0x0001
-            ant_mp3_dep_stop    = (ant_stat >> 6) & 0x0001
-            ant_mp3_dep_sys     = (ant_stat >> 5) & 0x0001
-            ant_mp4_deployed    = (ant_stat >> 3) & 0x0001
-            ant_mp4_dep_stop    = (ant_stat >> 2) & 0x0001
-            ant_mp4_dep_sys     = (ant_stat >> 1) & 0x0001
-            ant_ignore_sw       = (ant_stat >> 8) & 0x0001
-            ant_indb            = (ant_stat >> 4) & 0x0001
-            ant_armed           = ant_stat & 0x0001
+        if "lora_fsat2a_pkt_cnt" in data:
+            self.label_lora_fsat2a_pkt_cnt.set_text(str(int(data["lora_fsat2a_pkt_cnt"])))
 
-            if ant_indb:
-                self.label_ant_indep_burn.set_text("Enabled")
-            else:
-                self.label_ant_indep_burn.set_text("Disabled")
+        if "lora_fsat2a_temp" in data:
+            self.label_lora_fsat2a_temp.set_text(str(float(data["lora_fsat2a_temp"])) + " " + "°C")
 
-            if ant_ignore_sw:
-                self.label_ant_ignore_switches.set_text("True")
-            else:
-                self.label_ant_ignore_switches.set_text("False")
+        if "lora_fsat2a_rssi" in data:
+            self.label_lora_fsat2a_rssi.set_text(str(int(data["lora_fsat2a_rssi"])) + " " + "dB")
 
-            if ant_armed:
-                self.label_ant_armed.set_text("True")
-            else:
-                self.label_ant_armed.set_text("False")
+        if "lora_fsat2a_snr" in data:
+            self.label_lora_fsat2a_snr.set_text(str(float(data["lora_fsat2a_snr"])) + " " + "dB")
 
-            if ant_mp1_deployed:
-                self.label_ant_mp1_deployed.set_text("True")
-            else:
-                self.label_ant_mp1_deployed.set_text("False")
+        if "lora_fsat2a_freq_err" in data:
+            self.label_lora_fsat2a_freq_err.set_text(str(float(data["lora_fsat2a_freq_err"])) + " " + "Hz")
 
-            if ant_mp1_dep_stop:
-                self.label_ant_mp1_dep_stop.set_text("Timeout")
-            else:
-                self.label_ant_mp1_dep_stop.set_text("Other")
+        if "lora_fsat2b_sat_id" in data:
+            self.label_lora_fsat2b_id.set_text(str(int(data["lora_fsat2b_sat_id"])))
 
-            if ant_mp1_dep_sys:
-                self.label_ant_mp1_dep_sys.set_text("Activated")
+        if "lora_fsat2b_pkt_cnt" in data:
+            self.label_lora_fsat2b_pkt_cnt.set_text(str(int(data["lora_fsat2b_pkt_cnt"])))
 
-            else:
-                self.label_ant_mp1_dep_sys.set_text("Deactivated")
+        if "lora_fsat2b_temp" in data:
+            self.label_lora_fsat2b_temp.set_text(str(float(data["lora_fsat2b_temp"])) + " " + "°C")
 
-            if ant_mp2_deployed:
-                self.label_ant_mp2_deployed.set_text("True")
-            else:
-                self.label_ant_mp2_deployed.set_text("False")
+        if "lora_fsat2b_rssi" in data:
+            self.label_lora_fsat2b_rssi.set_text(str(int(data["lora_fsat2b_rssi"])) + " " + "dB")
 
-            if ant_mp2_dep_stop:
-                self.label_ant_mp2_dep_stop.set_text("Timeout")
-            else:
-                self.label_ant_mp2_dep_stop.set_text("Other")
+        if "lora_fsat2b_snr" in data:
+            self.label_lora_fsat2b_snr.set_text(str(float(data["lora_fsat2b_snr"])) + " " + "dB")
 
-            if ant_mp2_dep_sys:
-                self.label_ant_mp2_dep_sys.set_text("Activated")
-            else:
-                self.label_ant_mp2_dep_sys.set_text("Deactivated")
+        if "lora_fsat2b_freq_err" in data:
+            self.label_lora_fsat2b_freq_err.set_text(str(int(data["lora_fsat2b_freq_err"])) + " " + "Hz")
 
-            if ant_mp3_deployed:
-                self.label_ant_mp3_deployed.set_text("True")
-            else:
-                self.label_ant_mp3_deployed.set_text("False")
+        if "lora_fsat2b_bat_volt" in data:
+            self.label_lora_fsat2b_bat_volt.set_text(str(int(data["lora_fsat2b_bat_volt"])) + " " + "mV")
 
-            if ant_mp3_dep_stop:
-                self.label_ant_mp3_dep_stop.set_text("Timeout")
-            else:
-                self.label_ant_mp3_dep_stop.set_text("Other")
-
-            if ant_mp3_dep_sys:
-                self.label_ant_mp3_dep_sys.set_text("Activated")
-            else:
-                self.label_ant_mp3_dep_sys.set_text("Deactivated")
-
-            if ant_mp4_deployed:
-                self.label_ant_mp4_deployed.set_text("True")
-            else:
-                self.label_ant_mp4_deployed.set_text("False")
-
-            if ant_mp4_dep_stop:
-                self.label_ant_mp4_dep_stop.set_text("Timeout")
-            else:
-                self.label_ant_mp4_dep_stop.set_text("Other")
-
-            if ant_mp4_dep_sys:
-                self.label_ant_mp4_dep_sys.set_text("Activated")
-            else:
-                self.label_ant_mp4_dep_sys.set_text("Deactivated")
-
-        if "edc2_mss_err_count" in data:
-            self.label_edc1_mss_err_count.set_text(data["edc2_mss_err_count"])
+        if "lora_fsat2a_ts" in data:
+            self.label_lora_fsat2a_ts.set_text(data["lora_fsat2a_ts"])
+            self.label_lora_fsat2b_ts.set_text(data["lora_fsat2a_ts"])
 
     def _load_default_values_eps(self):
         self.label_eps_mcu_date.set_text("1970/01/01")
