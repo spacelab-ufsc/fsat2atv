@@ -47,6 +47,9 @@ _ICON_FILE_LINUX_SYSTEM         = '/usr/share/icons/fsat2atv_256x256.png'
 _LOGO_FILE_LOCAL                = os.path.abspath(os.path.dirname(__file__)) + '/data/img/spacelab-logo-full-400x200.png'
 _LOGO_FILE_LINUX_SYSTEM         = '/usr/share/fsat2atv/spacelab-logo-full-400x200.png'
 
+# Database file
+_FSAT2A_DATABASE_FILE           = 'fsat2a.db'
+
 class FSat2ATV:
 
     def __init__(self):
@@ -702,6 +705,50 @@ class FSat2ATV:
         self.label_obdh_op_date_last_reading.set_text("1970/01/01")
         self.label_obdh_op_time_last_reading.set_text("00:00:00")
         self.label_obdh_op_remaining_hib_time.set_text("0 sec")
+
+    def _load_default_values_ttc(self):
+        self.label_ttc_mcu1_date.set_text("1970/01/01")
+        self.label_ttc_mcu1_time.set_text("00:00:00")
+        self.label_ttc_mcu1_temp.set_text("0 °C")
+        self.label_ttc_mcu1_last_rst_cause.set_text("0")
+        self.label_ttc_mcu1_rst_count.set_text("0")
+        self.label_ttc_mcu1_volt.set_text("0 mV")
+        self.label_ttc_mcu1_curr.set_text("0 mA")
+        self.label_ttc_radio1_volt.set_text("0 mV")
+        self.label_ttc_radio1_curr.set_text("0 mA")
+        self.label_ttc_radio1_temp.set_text("0 °C")
+        self.label_ttc_radio1_tx_en.set_text("False")
+        self.label_ttc_radio1_count.set_text("0")
+        self.label_ttc_mcu1_date.set_text("1970/01/01")
+        self.label_ttc_mcu1_time.set_text("00:00:00")
+        self.label_ttc_mcu1_temp.set_text("0 °C")
+        self.label_ttc_mcu1_last_rst_cause.set_text("0")
+        self.label_ttc_mcu1_rst_count.set_text("0")
+        self.label_ttc_mcu1_volt.set_text("0 mV")
+        self.label_ttc_mcu1_curr.set_text("0 mA")
+        self.label_ttc_radio2_volt.set_text("0 mV")
+        self.label_ttc_radio2_curr.set_text("0 mA")
+        self.label_ttc_radio2_temp.set_text("0 °C")
+        self.label_ttc_radio2_tx_en.set_text("False")
+        self.label_ttc_radio2_tx_count.set_text("0")
+        self.label_ttc_radio2_rx_count.set_text("0")
+
+    def _load_default_values_lora(self):
+        self.label_lora_fsat2a_ts.set_text("1970/01/01 - 00:00:00")
+        self.label_lora_fsat2a_id.set_text("0")
+        self.label_lora_fsat2a_pkt_cnt.set_text("0")
+        self.label_lora_fsat2a_temp.set_text("0 °C")
+        self.label_lora_fsat2a_rssi.set_text("0 dB")
+        self.label_lora_fsat2a_snr.set_text("0 dB")
+        self.label_lora_fsat2a_freq_err.set_text("0 Hz")
+        self.label_lora_fsat2b_ts.set_text("1970/01/01 - 00:00:00")
+        self.label_lora_fsat2b_id.set_text("0")
+        self.label_lora_fsat2b_pkt_cnt.set_text("0")
+        self.label_lora_fsat2b_temp.set_text("0 °C")
+        self.label_lora_fsat2b_rssi.set_text("0 dB")
+        self.label_lora_fsat2b_snr.set_text("0 dB")
+        self.label_lora_fsat2b_freq_err.set_text("0 Hz")
+        self.label_lora_fsat2b_bat_volt.set_text("0 mV")
 
     def _create_socket_server(self, adr, port):
         """Create a TCP/IP socket server"""
