@@ -148,10 +148,7 @@ class FSat2ATV:
         self.label_obdh_mem_sec_eps                 = self.builder.get_object("label_obdh_mem_sec_eps")
         self.label_obdh_mem_sec_ttc_0               = self.builder.get_object("label_obdh_mem_sec_ttc_0")
         self.label_obdh_mem_sec_ttc_1               = self.builder.get_object("label_obdh_mem_sec_ttc_1")
-        self.label_obdh_mem_sec_antenna             = self.builder.get_object("label_obdh_mem_sec_antenna")
-        self.label_obdh_mem_sec_edc                 = self.builder.get_object("label_obdh_mem_sec_edc")
-        self.label_obdh_mem_sec_payloadx            = self.builder.get_object("label_obdh_mem_sec_payloadx")
-        self.label_obdh_mem_sec_sbcd                = self.builder.get_object("label_obdh_mem_sec_sbcd")
+        self.label_obdh_mem_sec_payload             = self.builder.get_object("label_obdh_mem_sec_payload")
         self.label_obdh_position_lattitude          = self.builder.get_object("label_obdh_position_lattitude")
         self.label_obdh_position_longitude          = self.builder.get_object("label_obdh_position_longitude")
         self.label_obdh_position_altitude           = self.builder.get_object("label_obdh_position_altitude")
@@ -169,10 +166,8 @@ class FSat2ATV:
         self.label_obdh_op_initial_hib              = self.builder.get_object("label_obdh_op_initial_hib")
         self.label_obdh_op_initial_hib_time         = self.builder.get_object("label_obdh_op_initial_hib_time")
         self.label_obdh_op_manual_mode              = self.builder.get_object("label_obdh_op_manual_mode")
-        self.label_obdh_op_main_edc                 = self.builder.get_object("label_obdh_op_main_edc")
         self.label_obdh_op_general_tm               = self.builder.get_object("label_obdh_op_general_tm")
-        self.label_obdh_op_main_pl_state            = self.builder.get_object("label_obdh_op_main_pl_state")
-        self.label_obdh_op_secondary_pl_state       = self.builder.get_object("label_obdh_op_secondary_pl_state")
+        self.label_obdh_op_pl_state                 = self.builder.get_object("label_obdh_op_pl_state")
         self.label_obdh_op_date_last_reading        = self.builder.get_object("label_obdh_op_date_last_reading")
         self.label_obdh_op_time_last_reading        = self.builder.get_object("label_obdh_op_time_last_reading")
         self.label_obdh_op_remaining_hib_time       = self.builder.get_object("label_obdh_op_remaining_hib_time")
@@ -483,17 +478,8 @@ class FSat2ATV:
         if "obdh_mem_sec_ttc_1" in data:
             self.label_obdh_mem_sec_ttc_1.set_text(data["obdh_mem_sec_ttc_1"])
 
-        if "obdh_mem_sec_ant" in data:
-            self.label_obdh_mem_sec_antenna.set_text(data["obdh_mem_sec_ant"])
-
-        if "obdh_mem_sec_edc" in data:
-            self.label_obdh_mem_sec_edc.set_text(data["obdh_mem_sec_edc"])
-
-        if "obdh_mem_sec_plx" in data:
-            self.label_obdh_mem_sec_payloadx.set_text(data["obdh_mem_sec_plx"])
-
-        if "obdh_mem_sec_sbcd" in data:
-            self.label_obdh_mem_sec_sbcd.set_text(data["obdh_mem_sec_sbcd"])
+        if "obdh_mem_sec_pl" in data:
+            self.label_obdh_pl_sec_antenna.set_text(data["obdh_mem_sec_pl"])
 
         if "obdh_pos_lat" in data:
             self.label_obdh_position_lattitude.set_text(data["obdh_pos_lat"] + "°")
@@ -557,14 +543,6 @@ class FSat2ATV:
             else:
                 self.label_obdh_op_manual_mode.set_text("Unknown")
 
-        if "obdh_op_main_edc" in data:
-            if int(data["obdh_op_main_edc"]) == 1:
-                self.label_obdh_op_main_edc.set_text("Main")
-            elif int(data["obdh_op_main_edc"]) == 2:
-                self.label_obdh_op_main_edc.set_text("Redundant")
-            else:
-                self.label_obdh_op_main_edc.set_text("Unknown")
-
         if "obdh_op_general_tm" in data:
             if int(data["obdh_op_general_tm"]) == 0:
                 self.label_obdh_op_general_tm.set_text("Disabled")
@@ -578,12 +556,6 @@ class FSat2ATV:
                 self.label_obdh_op_main_pl_state.set_text("Disabled")
             else:
                 self.label_obdh_op_main_pl_state.set_text(data["obdh_op_main_pl_state"])
-
-        if "obdh_op_pl_sec_state" in data:
-            if int(data["obdh_op_pl_sec_state"]) == 0:
-                self.label_obdh_op_secondary_pl_state.set_text("Disabled")
-            else:
-                self.label_obdh_op_secondary_pl_state.set_text(data["obdh_op_sec_pl_state"])
 
         if "obdh_op_last_reading_ts" in data:
             self.label_obdh_op_date_last_reading.set_text(datetime.datetime.fromtimestamp(int(data["obdh_op_last_reading_ts"])).strftime('%Y/%m/%d'))
@@ -706,10 +678,7 @@ class FSat2ATV:
         self.label_obdh_mem_sec_eps.set_text("0")
         self.label_obdh_mem_sec_ttc_0.set_text("0")
         self.label_obdh_mem_sec_ttc_1.set_text("0")
-        self.label_obdh_mem_sec_antenna.set_text("0")
-        self.label_obdh_mem_sec_edc.set_text("0")
-        self.label_obdh_mem_sec_payloadx.set_text("0")
-        self.label_obdh_mem_sec_sbcd.set_text("0")
+        self.label_obdh_mem_sec_payload.set_text("0")
         self.label_obdh_position_lattitude.set_text("0°")
         self.label_obdh_position_longitude.set_text("0°")
         self.label_obdh_position_altitude.set_text("0 km")
@@ -728,10 +697,8 @@ class FSat2ATV:
         self.label_obdh_op_initial_hib.set_text("Not Executed")
         self.label_obdh_op_initial_hib_time.set_text("0 min")
         self.label_obdh_op_manual_mode.set_text("Enabled")
-        self.label_obdh_op_main_edc.set_text("0")
         self.label_obdh_op_general_tm.set_text("Enabled")
-        self.label_obdh_op_main_pl_state.set_text("0")
-        self.label_obdh_op_secondary_pl_state.set_text("0")
+        self.label_obdh_op_pl_state.set_text("0")
         self.label_obdh_op_date_last_reading.set_text("1970/01/01")
         self.label_obdh_op_time_last_reading.set_text("00:00:00")
         self.label_obdh_op_remaining_hib_time.set_text("0 sec")
