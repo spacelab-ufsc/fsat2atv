@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=FSat2ATV
+Comment=FloripaSat-2A Telemetry Viewer
+Icon=/usr/share/icons/fsat2atv_256x256.png
+Exec=/usr/bin/fsat2atv
+Terminal=false
+Categories=HamRadio

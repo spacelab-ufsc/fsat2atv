@@ -1,0 +1,796 @@
+# -*- coding: utf-8 -*-
+
+#
+#  gu_tv.py
+#  
+#  Copyright The FloripaSat-2A Telemetry Viewer Contributors.
+#  
+#  This file is part of FloripaSat-2A Telemetry Viewer.
+#
+#  FloripaSat-2A Telemetry Viewer is free software; you can redistribute it
+#  and/or modify it under the terms of the GNU General Public License as
+#  published by the Free Software Foundation, either version 3 of the
+#  License, or (at your option) any later version.
+#  
+#  FloripaSat-2A Telemetry Viewer is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public
+#  License along with FloripaSat-2A Telemetry Viewer; if not, see
+#  <http://www.gnu.org/licenses/>.
+#  
+#
+
+import os
+import json
+import socket
+import datetime
+
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
+
+import fsat2atv.version
+import fsat2atv.convert
+
+# UI File
+_UI_FILE_LOCAL                  = os.path.abspath(os.path.dirname(__file__)) + '/data/ui/fsat2atv.glade'
+_UI_FILE_LINUX_SYSTEM           = '/usr/share/fsat2atv/fsat2atv.glade'
+
+# Icon File
+_ICON_FILE_LOCAL                = os.path.abspath(os.path.dirname(__file__)) + '/data/img/fsat2atv_256x256.png'
+_ICON_FILE_LINUX_SYSTEM         = '/usr/share/icons/fsat2atv_256x256.png'
+
+# Logo File
+_LOGO_FILE_LOCAL                = os.path.abspath(os.path.dirname(__file__)) + '/data/img/spacelab-logo-full-400x200.png'
+_LOGO_FILE_LINUX_SYSTEM         = '/usr/share/fsat2atv/spacelab-logo-full-400x200.png'
+
+# Database file
+_FSAT2A_DATABASE_FILE           = 'fsat2a.db'
+
+class FSat2ATV:
+
+    def __init__(self):
+        """
+        Main class constructor.
+
+        :return: None
+        """
+        self.builder = Gtk.Builder()
+
+        # UI file from Glade
+        if os.path.isfile(_UI_FILE_LOCAL):
+            self.builder.add_from_file(_UI_FILE_LOCAL)
+        else:
+            self.builder.add_from_file(_UI_FILE_LINUX_SYSTEM)
+
+        self.builder.connect_signals(self)
+
+        self._build_widgets()
+
+        self._server_socket = None
+
+    def _build_widgets(self):
+        # Main window
+        self.window = self.builder.get_object("window_main")
+        if os.path.isfile(_ICON_FILE_LOCAL):
+            self.window.set_icon_from_file(_ICON_FILE_LOCAL)
+        else:
+            self.window.set_icon_from_file(_ICON_FILE_LINUX_SYSTEM)
+        self.window.set_wmclass(self.window.get_title(), self.window.get_title())
+        self.window.connect("destroy", Gtk.main_quit)
+
+        # Toolbar
+        self.button_preferences         = self.builder.get_object("button_preferences")
+        self.entry_address              = self.builder.get_object("entry_address")
+        self.entry_port                 = self.builder.get_object("entry_port")
+        self.button_open_socket         = self.builder.get_object("button_open_socket")
+        self.button_open_socket.connect("clicked", self.on_button_open_socket_clicked)
+        self.button_close_socket        = self.builder.get_object("button_close_socket")
+        self.button_close_socket.connect("clicked", self.on_button_close_socket_clicked)
+
+        # EPS tab
+        self.label_eps_mcu_date             = self.builder.get_object("label_eps_mcu_date")
+        self.label_eps_mcu_time             = self.builder.get_object("label_eps_mcu_time")
+        self.label_eps_mcu_temp             = self.builder.get_object("label_eps_mcu_temp")
+        self.label_eps_mcu_curr             = self.builder.get_object("label_eps_mcu_curr")
+        self.label_eps_mcu_last_reset_cause = self.builder.get_object("label_eps_mcu_last_reset_cause")
+        self.label_eps_mcu_reset_count      = self.builder.get_object("label_eps_mcu_reset_count")
+        self.label_eps_sp_volt_mypx         = self.builder.get_object("label_eps_sp_volt_mypx")
+        self.label_eps_sp_volt_mxpz         = self.builder.get_object("label_eps_sp_volt_mxpz")
+        self.label_eps_sp_volt_mzpy         = self.builder.get_object("label_eps_sp_volt_mzpy")
+        self.label_eps_sp_curr_mx           = self.builder.get_object("label_eps_sp_curr_mx")
+        self.label_eps_sp_curr_px           = self.builder.get_object("label_eps_sp_curr_px")
+        self.label_eps_sp_curr_my           = self.builder.get_object("label_eps_sp_curr_my")
+        self.label_eps_sp_curr_py           = self.builder.get_object("label_eps_sp_curr_py")
+        self.label_eps_sp_curr_mz           = self.builder.get_object("label_eps_sp_curr_mz")
+        self.label_eps_sp_curr_pz           = self.builder.get_object("label_eps_sp_curr_pz")
+        self.label_eps_mppt_dc_ch_1         = self.builder.get_object("label_eps_mppt_dc_ch_1")
+        self.label_eps_mppt_dc_ch_2         = self.builder.get_object("label_eps_mppt_dc_ch_2")
+        self.label_eps_mppt_dc_ch_3         = self.builder.get_object("label_eps_mppt_dc_ch_3")
+        self.label_eps_mppt_mode_ch_1       = self.builder.get_object("label_eps_mppt_mode_ch_1")
+        self.label_eps_mppt_mode_ch_2       = self.builder.get_object("label_eps_mppt_mode_ch_2")
+        self.label_eps_mppt_mode_ch_3       = self.builder.get_object("label_eps_mppt_mode_ch_3")
+        self.label_eps_mppt_output_volt     = self.builder.get_object("label_eps_mppt_output_volt")
+        self.label_eps_rtd_ch_0             = self.builder.get_object("label_eps_rtd_ch_0")
+        self.label_eps_rtd_ch_1             = self.builder.get_object("label_eps_rtd_ch_1")
+        self.label_eps_rtd_ch_2             = self.builder.get_object("label_eps_rtd_ch_2")
+        self.label_eps_rtd_ch_3             = self.builder.get_object("label_eps_rtd_ch_3")
+        self.label_eps_rtd_ch_4             = self.builder.get_object("label_eps_rtd_ch_4")
+        self.label_eps_rtd_ch_5             = self.builder.get_object("label_eps_rtd_ch_5")
+        self.label_eps_rtd_ch_6             = self.builder.get_object("label_eps_rtd_ch_6")
+        self.label_eps_bat_volt             = self.builder.get_object("label_eps_bat_volt")
+        self.label_eps_bat_curr             = self.builder.get_object("label_eps_bat_curr")
+        self.label_eps_bat_average_curr     = self.builder.get_object("label_eps_bat_average_curr")
+        self.label_eps_bat_acc_curr         = self.builder.get_object("label_eps_bat_acc_curr")
+        self.label_eps_bat_charge           = self.builder.get_object("label_eps_bat_charge")
+        self.label_eps_bat_heater_1_dc      = self.builder.get_object("label_eps_bat_heater_1_dc")
+        self.label_eps_bat_heater_2_dc      = self.builder.get_object("label_eps_bat_heater_2_dc")
+        self.label_eps_bat_heater_1_mode    = self.builder.get_object("label_eps_bat_heater_1_mode")
+        self.label_eps_bat_heater_2_mode    = self.builder.get_object("label_eps_bat_heater_2_mode")
+        self.label_eps_bat_temp_monitor     = self.builder.get_object("label_eps_bat_temp_monitor")
+        self.label_eps_bat_status           = self.builder.get_object("label_eps_bat_status")
+        self.label_eps_bat_protection       = self.builder.get_object("label_eps_bat_protection")
+        self.label_eps_bat_cycle_counter    = self.builder.get_object("label_eps_bat_cycle_counter")
+        self.label_eps_bat_raac             = self.builder.get_object("label_eps_bat_raac")
+        self.label_eps_bat_rsac             = self.builder.get_object("label_eps_bat_rsac")
+        self.label_eps_bat_rarc             = self.builder.get_object("label_eps_bat_rarc")
+        self.label_eps_bat_rsrc             = self.builder.get_object("label_eps_bat_rsrc")
+
+        # OBDH
+        self.label_obdh_mcu_date                    = self.builder.get_object("label_obdh_mcu_date")
+        self.label_obdh_mcu_time                    = self.builder.get_object("label_obdh_mcu_time")
+        self.label_obdh_mcu_temp                    = self.builder.get_object("label_obdh_mcu_temp")
+        self.label_obdh_mcu_last_reset_cause        = self.builder.get_object("label_obdh_mcu_last_reset_cause")
+        self.label_obdh_mcu_reset_count             = self.builder.get_object("label_obdh_mcu_reset_count")
+        self.label_obdh_general_voltage             = self.builder.get_object("label_obdh_general_voltage")
+        self.label_obdh_general_current             = self.builder.get_object("label_obdh_general_current")
+        self.label_obdh_mem_sec_obdh                = self.builder.get_object("label_obdh_mem_sec_obdh")
+        self.label_obdh_mem_sec_eps                 = self.builder.get_object("label_obdh_mem_sec_eps")
+        self.label_obdh_mem_sec_ttc_0               = self.builder.get_object("label_obdh_mem_sec_ttc_0")
+        self.label_obdh_mem_sec_ttc_1               = self.builder.get_object("label_obdh_mem_sec_ttc_1")
+        self.label_obdh_mem_sec_payload             = self.builder.get_object("label_obdh_mem_sec_payload")
+        self.label_obdh_position_lattitude          = self.builder.get_object("label_obdh_position_lattitude")
+        self.label_obdh_position_longitude          = self.builder.get_object("label_obdh_position_longitude")
+        self.label_obdh_position_altitude           = self.builder.get_object("label_obdh_position_altitude")
+        self.label_obdh_position_date               = self.builder.get_object("label_obdh_position_date")
+        self.label_obdh_position_time               = self.builder.get_object("label_obdh_position_time")
+        self.textview_obdh_position_tle             = self.builder.get_object("textview_obdh_position_tle")
+        self.textbuffer_obdh_position_tle           = self.textview_obdh_position_tle.get_buffer()
+        self.label_obdh_position_date               = self.builder.get_object("label_obdh_position_date")
+        self.label_obdh_position_time               = self.builder.get_object("label_obdh_position_time")
+        self.label_obdh_op_last_valid_tc            = self.builder.get_object("label_obdh_op_last_valid_tc")
+        self.label_obdh_op_mode                     = self.builder.get_object("label_obdh_op_mode")
+        self.label_obdh_op_date_last_mode_change    = self.builder.get_object("label_obdh_op_date_last_mode_change")
+        self.label_obdh_op_time_last_mode_change    = self.builder.get_object("label_obdh_op_time_last_mode_change")
+        self.label_obdh_op_mode_duration            = self.builder.get_object("label_obdh_op_mode_duration")
+        self.label_obdh_op_initial_hib              = self.builder.get_object("label_obdh_op_initial_hib")
+        self.label_obdh_op_initial_hib_time         = self.builder.get_object("label_obdh_op_initial_hib_time")
+        self.label_obdh_op_manual_mode              = self.builder.get_object("label_obdh_op_manual_mode")
+        self.label_obdh_op_general_tm               = self.builder.get_object("label_obdh_op_general_tm")
+        self.label_obdh_op_pl_state                 = self.builder.get_object("label_obdh_op_pl_state")
+        self.label_obdh_op_date_last_reading        = self.builder.get_object("label_obdh_op_date_last_reading")
+        self.label_obdh_op_time_last_reading        = self.builder.get_object("label_obdh_op_time_last_reading")
+        self.label_obdh_op_remaining_hib_time       = self.builder.get_object("label_obdh_op_remaining_hib_time")
+
+        # TTC
+        self.label_ttc_mcu1_date                    = self.builder.get_object("label_ttc_mcu1_date")
+        self.label_ttc_mcu1_time                    = self.builder.get_object("label_ttc_mcu1_time")
+        self.label_ttc_mcu1_temp                    = self.builder.get_object("label_ttc_mcu1_temp")
+        self.label_ttc_mcu1_last_rst_cause          = self.builder.get_object("label_ttc_mcu1_last_rst_cause")
+        self.label_ttc_mcu1_rst_count               = self.builder.get_object("label_ttc_mcu1_rst_count")
+        self.label_ttc_mcu1_volt                    = self.builder.get_object("label_ttc_mcu1_volt")
+        self.label_ttc_mcu1_curr                    = self.builder.get_object("label_ttc_mcu1_curr")
+        self.label_ttc_radio1_volt                  = self.builder.get_object("label_ttc_radio1_volt")
+        self.label_ttc_radio1_curr                  = self.builder.get_object("label_ttc_radio1_curr")
+        self.label_ttc_radio1_temp                  = self.builder.get_object("label_ttc_radio1_temp")
+        self.label_ttc_radio1_tx_en                 = self.builder.get_object("label_ttc_radio1_tx_en")
+        self.label_ttc_radio1_count                 = self.builder.get_object("label_ttc_radio1_count")
+        self.label_ttc_mcu1_date                    = self.builder.get_object("label_ttc_mcu1_date")
+        self.label_ttc_mcu1_time                    = self.builder.get_object("label_ttc_mcu1_time")
+        self.label_ttc_mcu1_temp                    = self.builder.get_object("label_ttc_mcu1_temp")
+        self.label_ttc_mcu1_last_rst_cause          = self.builder.get_object("label_ttc_mcu1_last_rst_cause")
+        self.label_ttc_mcu1_rst_count               = self.builder.get_object("label_ttc_mcu1_rst_count")
+        self.label_ttc_mcu1_volt                    = self.builder.get_object("label_ttc_mcu1_volt")
+        self.label_ttc_mcu1_curr                    = self.builder.get_object("label_ttc_mcu1_curr")
+        self.label_ttc_radio2_volt                  = self.builder.get_object("label_ttc_radio2_volt")
+        self.label_ttc_radio2_curr                  = self.builder.get_object("label_ttc_radio2_curr")
+        self.label_ttc_radio2_temp                  = self.builder.get_object("label_ttc_radio2_temp")
+        self.label_ttc_radio2_tx_en                 = self.builder.get_object("label_ttc_radio2_tx_en")
+        self.label_ttc_radio2_tx_count              = self.builder.get_object("label_ttc_radio2_tx_count")
+        self.label_ttc_radio2_rx_count              = self.builder.get_object("label_ttc_radio2_rx_count")
+
+        # LoRa Payload
+        self.label_lora_fsat2a_ts                   = self.builder.get_object("label_lora_fsat2a_ts")
+        self.label_lora_fsat2a_id                   = self.builder.get_object("label_lora_fsat2a_id")
+        self.label_lora_fsat2a_pkt_cnt              = self.builder.get_object("label_lora_fsat2a_pkt_cnt")
+        self.label_lora_fsat2a_temp                 = self.builder.get_object("label_lora_fsat2a_temp")
+        self.label_lora_fsat2a_rssi                 = self.builder.get_object("label_lora_fsat2a_rssi")
+        self.label_lora_fsat2a_snr                  = self.builder.get_object("label_lora_fsat2a_snr")
+        self.label_lora_fsat2a_freq_err             = self.builder.get_object("label_lora_fsat2a_freq_err")
+
+        self.label_lora_fsat2b_ts                   = self.builder.get_object("label_lora_fsat2b_ts")
+        self.label_lora_fsat2b_id                   = self.builder.get_object("label_lora_fsat2b_id")
+        self.label_lora_fsat2b_pkt_cnt              = self.builder.get_object("label_lora_fsat2b_pkt_cnt")
+        self.label_lora_fsat2b_temp                 = self.builder.get_object("label_lora_fsat2b_temp")
+        self.label_lora_fsat2b_rssi                 = self.builder.get_object("label_lora_fsat2b_rssi")
+        self.label_lora_fsat2b_snr                  = self.builder.get_object("label_lora_fsat2b_snr")
+        self.label_lora_fsat2b_freq_err             = self.builder.get_object("label_lora_fsat2b_freq_err")
+        self.label_lora_fsat2b_bat_volt             = self.builder.get_object("label_lora_fsat2b_bat_volt")
+
+        # About dialog
+        self.aboutdialog = self.builder.get_object("aboutdialog_fsat2atv")
+        self.aboutdialog.set_version(fsat2atv.version.__version__)
+        if os.path.isfile(_LOGO_FILE_LOCAL):
+            self.aboutdialog.set_logo(GdkPixbuf.Pixbuf.new_from_file(_LOGO_FILE_LOCAL))
+        else:
+            self.aboutdialog.set_logo(GdkPixbuf.Pixbuf.new_from_file(_LOGO_FILE_LINUX_SYSTEM))
+
+        # About toolbutton
+        self.toolbutton_about = self.builder.get_object("toolbutton_about")
+        self.toolbutton_about.connect("clicked", self.on_toolbutton_about_clicked)
+
+    def run(self):
+        self.window.show_all()
+
+        Gtk.main()
+
+        return 0
+
+    def destroy(window, self):
+        Gtk.main_quit()
+
+    def on_button_open_socket_clicked(self, button):
+        try:
+            adr = self.entry_address.get_text()
+            port = int(self.entry_port.get_text())
+
+            self._server_socket = self._create_socket_server(adr, int(port))
+
+            if self._server_socket:
+                # Monitor the socket for incoming connections using GLib's IO watch
+                self._socket_io_channel = GLib.IOChannel(self._server_socket.fileno())
+                GLib.io_add_watch(self._socket_io_channel, GLib.IO_IN, self._handle_new_connection)
+
+                self.entry_address.set_sensitive(False)
+                self.entry_port.set_sensitive(False)
+                self.button_open_socket.set_sensitive(False)
+                self.button_close_socket.set_sensitive(True)
+        except socket.error as e:
+            error_dialog = Gtk.MessageDialog(None, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.OK, "Error opening the socker server!")
+            error_dialog.format_secondary_text(str(e))
+            error_dialog.run()
+            error_dialog.destroy()
+
+    def on_button_close_socket_clicked(self, button):
+        self._server_socket.shutdown(socket.SHUT_RDWR)
+        self._server_socket.close()
+
+        self.entry_address.set_sensitive(True)
+        self.entry_port.set_sensitive(True)
+        self.button_open_socket.set_sensitive(True)
+        self.button_close_socket.set_sensitive(False)
+
+    def on_toolbutton_about_clicked(self, toolbutton):
+        response = self.aboutdialog.run()
+
+        if response == Gtk.ResponseType.DELETE_EVENT:
+            self.aboutdialog.hide()
+
+    def _decode_pkt(self, pkt_json):
+        data = json.loads(pkt_json)
+
+        if "eps_timestamp" in data:
+            self.label_eps_mcu_date.set_text(datetime.datetime.fromtimestamp(int(data["eps_timestamp"])).strftime('%Y/%m/%d'))
+            self.label_eps_mcu_time.set_text(datetime.datetime.fromtimestamp(int(data["eps_timestamp"])).strftime('%H:%M:%S'))
+#            self.label_eps_mcu_time.override_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0, 1, 0, 1))
+#        else:
+#            self.label_eps_mcu_time.override_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0, 0, 0, 1))
+
+        if "eps_mcu_temp" in data:
+            self.label_eps_mcu_temp.set_text(str((int(data["eps_mcu_temp"]) - 273)) + " " + "°C")
+
+        if "eps_mcu_curr" in data:
+            self.label_eps_mcu_curr.set_text(data["eps_mcu_curr"] + " " + "mA")
+
+        if "eps_mcu_last_rst_cause" in data:
+            self.label_eps_mcu_last_reset_cause.set_text(data["eps_mcu_last_rst_cause"])
+
+        if "eps_mcu_rst_count" in data:
+            self.label_eps_mcu_reset_count.set_text(data["eps_mcu_rst_count"])
+
+        if "eps_sp_volt_mypx" in data:
+            self.label_eps_sp_volt_mypx.set_text(data["eps_sp_volt_mypx"] + " " + "mV")
+
+        if "eps_sp_volt_mxpz" in data:
+            self.label_eps_sp_volt_mxpz.set_text(data["eps_sp_volt_mxpz"] + " " + "mV")
+
+        if "eps_sp_volt_mzpy" in data:
+            self.label_eps_sp_volt_mzpy.set_text(data["eps_sp_volt_mzpy"] + " " + "mV")
+
+        if "eps_sp_curr_mx" in data:
+            self.label_eps_sp_curr_mx.set_text(data["eps_sp_curr_mx"] + " " + "mA")
+
+        if "eps_sp_curr_px" in data:
+            self.label_eps_sp_curr_px.set_text(data["eps_sp_curr_px"] + " " + "mA")
+
+        if "eps_sp_curr_my" in data:
+            self.label_eps_sp_curr_my.set_text(data["eps_sp_curr_my"] + " " + "mA")
+
+        if "eps_sp_curr_py" in data:
+            self.label_eps_sp_curr_py.set_text(data["eps_sp_curr_py"] + " " + "mA")
+
+        if "eps_sp_curr_mz" in data:
+            self.label_eps_sp_curr_mz.set_text(data["eps_sp_curr_mz"] + " " + "mA")
+
+        if "eps_sp_curr_pz" in data:
+            self.label_eps_sp_curr_pz.set_text(data["eps_sp_curr_pz"] + " " + "mA")
+
+        if "eps_mppt_1_dc" in data:
+            self.label_eps_mppt_dc_ch_1.set_text(data["eps_mppt_1_dc"] + " " + "%")
+
+        if "eps_mppt_2_dc" in data:
+            self.label_eps_mppt_dc_ch_2.set_text(data["eps_mppt_2_dc"] + " " + "%")
+
+        if "eps_mppt_3_dc" in data:
+            self.label_eps_mppt_dc_ch_3.set_text(data["eps_mppt_3_dc"] + " " + "%")
+
+        if "eps_mppt_1_mode" in data:
+            if int(data["eps_mppt_1_mode"]) == 0:
+                self.label_eps_mppt_mode_ch_1.set_text("Automatic")
+            elif int(data["eps_mppt_1_mode"]) == 1:
+                self.label_eps_mppt_mode_ch_1.set_text("Manual")
+            else:
+                self.label_eps_mppt_mode_ch_1.set_text("Unknown")
+
+        if "eps_mppt_2_mode" in data:
+            if int(data["eps_mppt_2_mode"]) == 0:
+                self.label_eps_mppt_mode_ch_2.set_text("Automatic")
+            elif int(data["eps_mppt_2_mode"]) == 1:
+                self.label_eps_mppt_mode_ch_2.set_text("Manual")
+            else:
+                self.label_eps_mppt_mode_ch_2.set_text("Unknown")
+
+        if "eps_mppt_3_mode" in data:
+            if int(data["eps_mppt_3_mode"]) == 0:
+                self.label_eps_mppt_mode_ch_3.set_text("Automatic")
+            elif int(data["eps_mppt_3_mode"]) == 1:
+                self.label_eps_mppt_mode_ch_3.set_text("Manual")
+            else:
+                self.label_eps_mppt_mode_ch_3.set_text("Unknown")
+
+        if "eps_mppt_sp_volt" in data:
+            self.label_eps_mppt_output_volt.set_text(data["eps_mppt_sp_volt"] + " " + "mV")
+
+        if "eps_rtd_0_temp" in data:
+            self.label_eps_rtd_ch_0.set_text(str(int(data["eps_rtd_0_temp"]) - 273) + " " + "°C")
+
+        if "eps_rtd_1_temp" in data:
+            self.label_eps_rtd_ch_1.set_text(str(int(data["eps_rtd_1_temp"]) - 273) + " " + "°C")
+
+        if "eps_rtd_2_temp" in data:
+            self.label_eps_rtd_ch_2.set_text(str(int(data["eps_rtd_2_temp"]) - 273) + " " + "°C")
+
+        if "eps_rtd_3_temp" in data:
+            self.label_eps_rtd_ch_3.set_text(str(int(data["eps_rtd_3_temp"]) - 273) + " " + "°C")
+
+        if "eps_rtd_4_temp" in data:
+            self.label_eps_rtd_ch_4.set_text(str(int(data["eps_rtd_4_temp"]) - 273) + " " + "°C")
+
+        if "eps_rtd_5_temp" in data:
+            self.label_eps_rtd_ch_5.set_text(str(int(data["eps_rtd_5_temp"]) - 273) + " " + "°C")
+
+        if "eps_rtd_6_temp" in data:
+            self.label_eps_rtd_ch_6.set_text(str(int(data["eps_rtd_6_temp"]) - 273) + " " + "°C")
+
+        if "eps_bat_volt" in data:
+            self.label_eps_bat_volt.set_text(data["eps_bat_volt"] + " " + "mV")
+
+        if "eps_bat_curr" in data:
+            self.label_eps_bat_curr.set_text(data["eps_bat_curr"] + " " + "mA")
+
+        if "eps_bat_avg_curr" in data:
+            self.label_eps_bat_average_curr.set_text(data["eps_bat_avg_curr"] + " " + "mA")
+
+        if "eps_bat_acc_curr" in data:
+            self.label_eps_bat_acc_curr.set_text(data["eps_bat_acc_curr"] + " " + "mA")
+
+        if "eps_bat_charge" in data:
+            self.label_eps_bat_charge.set_text(data["eps_bat_charge"] + " " + "mAh")
+
+        if "eps_bat_heater_1_dc" in data:
+            self.label_eps_bat_heater_1_dc.set_text(data["eps_bat_heater_1_dc"] + " " + "%")
+
+        if "eps_bat_heater_2_dc" in data:
+            self.label_eps_bat_heater_2_dc.set_text(data["eps_bat_heater_2_dc"] + " " + "%")
+
+        if "eps_bat_heater_1_mode" in data:
+            if int(data["eps_bat_heater_1_mode"]) == 0:
+                self.label_eps_bat_heater_1_mode.set_text("Automatic")
+            elif int(data["eps_bat_heater_1_mode"]) == 1:
+                self.label_eps_bat_heater_1_mode.set_text("Manual")
+            else:
+                self.label_eps_bat_heater_1_mode.set_text("Unknown")
+
+        if "eps_bat_heater_2_mode" in data:
+            if int(data["eps_bat_heater_2_mode"]) == 0:
+                self.label_eps_bat_heater_2_mode.set_text("Automatic")
+            elif int(data["eps_bat_heater_2_mode"]) == 1:
+                self.label_eps_bat_heater_2_mode.set_text("Manual")
+            else:
+                self.label_eps_bat_heater_2_mode.set_text("Unknown")
+
+        if "eps_bat_mon_temp" in data:
+            self.label_eps_bat_temp_monitor.set_text(str((int(data["eps_bat_mon_temp"]) - 273)) + " " + "°C")
+
+#        if "eps_main_pwr_bus_volt" in data:
+#            self..set_text(data["eps_main_pwr_bus_volt"] + " " + "mV")
+
+        '''
+        if "" in data:
+            self.label_eps_bat_protection.set_text()
+
+        if "" in data:
+            self.label_eps_bat_cycle_counter.set_text()
+
+        if "" in data:
+            self.label_eps_bat_raac.set_text()
+
+        if "" in data:
+            self.label_eps_bat_rsac.set_text()
+
+        if "" in data:
+            self.label_eps_bat_rarc.set_text()
+
+        if "" in data:
+            self.label_eps_bat_rsrc.set_text()
+        '''
+        if "obdh_timestamp" in data:
+            self.label_obdh_mcu_date.set_text(datetime.datetime.fromtimestamp(int(data["obdh_timestamp"])).strftime('%Y/%m/%d'))
+            self.label_obdh_mcu_time.set_text(datetime.datetime.fromtimestamp(int(data["obdh_timestamp"])).strftime('%H:%M:%S'))
+
+        if "obdh_mcu_temp" in data:
+            self.label_obdh_mcu_temp.set_text(str((int(data["obdh_mcu_temp"]) - 273)) + " " + "°C")
+
+        if "obdh_mcu_last_rst_cause" in data:
+            self.label_obdh_mcu_last_reset_cause.set_text(data["obdh_mcu_last_rst_cause"])
+
+        if "obdh_mcu_rst_count" in data:
+            self.label_obdh_mcu_reset_count.set_text(data["obdh_mcu_rst_count"])
+
+        if "obdh_volt" in data:
+            self.label_obdh_general_voltage.set_text(data["obdh_volt"] + " " + "mV")
+
+        if "obdh_curr" in data:
+            self.label_obdh_general_current.set_text(data["obdh_curr"] + " " + "mA")
+
+#        if "obdh_mem_data_log" in data:
+#            self..set_text(data["obdh_mem_data_log"])
+
+        if "obdh_mem_sec_obdh" in data:
+            self.label_obdh_mem_sec_obdh.set_text(data["obdh_mem_sec_obdh"])
+
+        if "obdh_mem_sec_eps" in data:
+            self.label_obdh_mem_sec_eps.set_text(data["obdh_mem_sec_eps"])
+
+        if "obdh_mem_sec_ttc_0" in data:
+            self.label_obdh_mem_sec_ttc_0.set_text(data["obdh_mem_sec_ttc_0"])
+
+        if "obdh_mem_sec_ttc_1" in data:
+            self.label_obdh_mem_sec_ttc_1.set_text(data["obdh_mem_sec_ttc_1"])
+
+        if "obdh_mem_sec_pl" in data:
+            self.label_obdh_pl_sec_antenna.set_text(data["obdh_mem_sec_pl"])
+
+        if "obdh_pos_lat" in data:
+            self.label_obdh_position_lattitude.set_text(data["obdh_pos_lat"] + "°")
+
+        if "obdh_pos_lon" in data:
+            self.label_obdh_position_longitude.set_text(data["obdh_pos_lon"] + "°")
+
+        if "obdh_pos_alt" in data:
+            self.label_obdh_position_altitude.set_text(data["obdh_pos_alt"] + " " + "km")
+
+        if "obdh_pos_ts" in data:
+            self.label_obdh_position_date.set_text(datetime.datetime.fromtimestamp(int(data["obdh_pos_ts"])).strftime('%Y/%m/%d'))
+            self.label_obdh_position_time.set_text(datetime.datetime.fromtimestamp(int(data["obdh_pos_ts"])).strftime('%H:%M:%S'))
+
+        if "obdh_pos_tle_line_1" in data:
+            self.textbuffer_obdh_position_tle.set_text(data["obdh_pos_tle_line_1"])
+
+        if "obdh_pos_tle_line_2" in data:
+            self.textbuffer_obdh_position_tle.set_text(data["obdh_pos_tle_line_2"])
+
+        if "obdh_pos_last_tle_upd_ts" in data:
+            self.label_obdh_position_date.set_text(datetime.datetime.fromtimestamp(int(data["obdh_pos_last_tle_upd_ts"])).strftime('%Y/%m/%d'))
+            self.label_obdh_position_time.set_text(datetime.datetime.fromtimestamp(int(data["obdh_pos_last_tle_upd_ts"])).strftime('%H:%M:%S'))
+
+        if "obdh_op_last_val_tc" in data:
+            self.label_obdh_op_last_valid_tc.set_text(data["obdh_op_last_val_tc"])
+
+        if "obdh_op_mode" in data:
+            if int(data["obdh_op_mode"]) == 0:
+                self.label_obdh_op_mode.set_text("Normal")
+            elif int(data["obdh_op_mode"]) == 1:
+                self.label_obdh_op_mode.set_text("Hibernation")
+            elif int(data["obdh_op_mode"]) == 2:
+                self.label_obdh_op_mode.set_text("Standby")
+            else:
+                self.label_obdh_op_mode.set_text("Unknown")
+
+        if "obdh_op_last_mode_change_ts" in data:
+            self.label_obdh_op_date_last_mode_change.set_text(datetime.datetime.fromtimestamp(int(data["obdh_op_last_mode_change_ts"])).strftime('%Y/%m/%d'))
+            self.label_obdh_op_time_last_mode_change.set_text(datetime.datetime.fromtimestamp(int(data["obdh_op_last_mode_change_ts"])).strftime('%H:%M:%S'))
+
+        if "obdh_op_mode_dur" in data:
+            self.label_obdh_op_mode_duration.set_text(data["obdh_op_mode_dur"] + " " + "sec")
+
+        if "obdh_op_init_hib" in data:
+            if int(data["obdh_op_init_hib"]) == 0:
+                self.label_obdh_op_initial_hib.set_text("Not Executed")
+            if int(data["obdh_op_init_hib"]) == 1:
+                self.label_obdh_op_initial_hib.set_text("Executed")
+            else:
+                self.label_obdh_op_initial_hib.set_text("Unknown")
+
+        if "obdh_op_init_hib_time" in data:
+            self.label_obdh_op_initial_hib_time.set_text(data["obdh_op_init_hib_time"] + " " + "min")
+
+        if "obdh_op_manual_mode" in data:
+            if int(data["obdh_op_manual_mode"]) == 0:
+                self.label_obdh_op_manual_mode.set_text("Disabled")
+            elif int(data["obdh_op_manual_mode"]) == 1:
+                self.label_obdh_op_manual_mode.set_text("Enabled")
+            else:
+                self.label_obdh_op_manual_mode.set_text("Unknown")
+
+        if "obdh_op_general_tm" in data:
+            if int(data["obdh_op_general_tm"]) == 0:
+                self.label_obdh_op_general_tm.set_text("Disabled")
+            elif int(data["obdh_op_general_tm"]) == 1:
+                self.label_obdh_op_general_tm.set_text("Enabled")
+            else:
+                self.label_obdh_op_general_tm.set_text("Unknown")
+
+        if "obdh_op_pl_main_state" in data:
+            if int(data["obdh_op_pl_main_state"]) == 0:
+                self.label_obdh_op_main_pl_state.set_text("Disabled")
+            else:
+                self.label_obdh_op_main_pl_state.set_text(data["obdh_op_main_pl_state"])
+
+        if "obdh_op_last_reading_ts" in data:
+            self.label_obdh_op_date_last_reading.set_text(datetime.datetime.fromtimestamp(int(data["obdh_op_last_reading_ts"])).strftime('%Y/%m/%d'))
+            self.label_obdh_op_date_last_reading.set_text(datetime.datetime.fromtimestamp(int(data["obdh_op_last_reading_ts"])).strftime('%H:%M:%S'))
+
+        if "obdh_op_remaining_hib_time" in data:
+            self.label_obdh_op_remaining_hib_time.set_text(data["obdh_op_remaining_hib_time"] + " " + "min")
+
+        if "obdh_last_valid_tc_rssi" in data:
+            self.label_obdh_op_date_last_reading.set_text(datetime.datetime.fromtimestamp(int(data["obdh_last_valid_tc_rssi"])).strftime('%Y/%m/%d'))
+            self.label_obdh_op_time_last_reading.set_text(datetime.datetime.fromtimestamp(int(data["obdh_last_valid_tc_rssi"])).strftime('%H:%M:%S'))
+
+        if "obdh_sensor_read_ts" in data:
+            self.label_obdh_op_date_last_reading.set_text(datetime.datetime.fromtimestamp(int(data["obdh_sensor_read_ts"])).strftime('%Y/%m/%d'))
+            self.label_obdh_op_time_last_reading.set_text(datetime.datetime.fromtimestamp(int(data["obdh_sensor_read_ts"])).strftime('%H:%M:%S'))
+
+        if "ttc_radio1_temp" in data:
+            self.label_ttc_radio2_temp.set_text(str(float(data["ttc_radio1_temp"])) + " " + "°C")
+
+        if "lora_fsat2a_sat_id" in data:
+            self.label_lora_fsat2a_id.set_text(str(int(data["lora_fsat2a_sat_id"])))
+
+        if "lora_fsat2a_pkt_cnt" in data:
+            self.label_lora_fsat2a_pkt_cnt.set_text(str(int(data["lora_fsat2a_pkt_cnt"])))
+
+        if "lora_fsat2a_temp" in data:
+            self.label_lora_fsat2a_temp.set_text(str(float(data["lora_fsat2a_temp"])) + " " + "°C")
+
+        if "lora_fsat2a_rssi" in data:
+            self.label_lora_fsat2a_rssi.set_text(str(int(data["lora_fsat2a_rssi"])) + " " + "dB")
+
+        if "lora_fsat2a_snr" in data:
+            self.label_lora_fsat2a_snr.set_text(str(float(data["lora_fsat2a_snr"])) + " " + "dB")
+
+        if "lora_fsat2a_freq_err" in data:
+            self.label_lora_fsat2a_freq_err.set_text(str(float(data["lora_fsat2a_freq_err"])) + " " + "Hz")
+
+        if "lora_fsat2b_sat_id" in data:
+            self.label_lora_fsat2b_id.set_text(str(int(data["lora_fsat2b_sat_id"])))
+
+        if "lora_fsat2b_pkt_cnt" in data:
+            self.label_lora_fsat2b_pkt_cnt.set_text(str(int(data["lora_fsat2b_pkt_cnt"])))
+
+        if "lora_fsat2b_temp" in data:
+            self.label_lora_fsat2b_temp.set_text(str(float(data["lora_fsat2b_temp"])) + " " + "°C")
+
+        if "lora_fsat2b_rssi" in data:
+            self.label_lora_fsat2b_rssi.set_text(str(int(data["lora_fsat2b_rssi"])) + " " + "dB")
+
+        if "lora_fsat2b_snr" in data:
+            self.label_lora_fsat2b_snr.set_text(str(float(data["lora_fsat2b_snr"])) + " " + "dB")
+
+        if "lora_fsat2b_freq_err" in data:
+            self.label_lora_fsat2b_freq_err.set_text(str(int(data["lora_fsat2b_freq_err"])) + " " + "Hz")
+
+        if "lora_fsat2b_bat_volt" in data:
+            self.label_lora_fsat2b_bat_volt.set_text(str(int(data["lora_fsat2b_bat_volt"])) + " " + "mV")
+
+        if "lora_fsat2a_ts" in data:
+            self.label_lora_fsat2a_ts.set_text(data["lora_fsat2a_ts"])
+            self.label_lora_fsat2b_ts.set_text(data["lora_fsat2a_ts"])
+
+    def _load_default_values_eps(self):
+        self.label_eps_mcu_date.set_text("1970/01/01")
+        self.label_eps_mcu_time.set_text("00:00:00")
+        self.label_eps_mcu_temp.set_text("0 °C")
+        self.label_eps_mcu_curr.set_text("0 mA")
+        self.label_eps_mcu_last_reset_cause.set_text("0")
+        self.label_eps_mcu_reset_count.set_text("0")
+        self.label_eps_sp_volt_mypx.set_text("0 mV")
+        self.label_eps_sp_volt_mxpz.set_text("0 mV")
+        self.label_eps_sp_volt_mzpy.set_text("0 mV")
+        self.label_eps_sp_curr_mx.set_text("0 mA")
+        self.label_eps_sp_curr_px.set_text("0 mA")
+        self.label_eps_sp_curr_my.set_text("0 mA")
+        self.label_eps_sp_curr_py.set_text("0 mA")
+        self.label_eps_sp_curr_mz.set_text("0 mA")
+        self.label_eps_sp_curr_pz.set_text("0 mA")
+        self.label_eps_mppt_dc_ch_1.set_text("0 %")
+        self.label_eps_mppt_dc_ch_2.set_text("0 %")
+        self.label_eps_mppt_dc_ch_3.set_text("0 %")
+        self.label_eps_mppt_mode_ch_1.set_text("Automatic")
+        self.label_eps_mppt_mode_ch_2.set_text("Automatic")
+        self.label_eps_mppt_mode_ch_3.set_text("Automatic")
+        self.label_eps_mppt_output_volt.set_text("0 mV")
+        self.label_eps_rtd_ch_0.set_text("0 °C")
+        self.label_eps_rtd_ch_1.set_text("0 °C")
+        self.label_eps_rtd_ch_2.set_text("0 °C")
+        self.label_eps_rtd_ch_3.set_text("0 °C")
+        self.label_eps_rtd_ch_4.set_text("0 °C")
+        self.label_eps_rtd_ch_5.set_text("0 °C")
+        self.label_eps_rtd_ch_6.set_text("0 °C")
+        self.label_eps_bat_volt.set_text("0 mV")
+        self.label_eps_bat_curr.set_text("0 mA")
+        self.label_eps_bat_average_curr.set_text("0 mA")
+        self.label_eps_bat_acc_curr.set_text("0 mA")
+        self.label_eps_bat_charge.set_text("0 mAh")
+        self.label_eps_bat_heater_1_dc.set_text("0 %")
+        self.label_eps_bat_heater_2_dc.set_text("0 %")
+        self.label_eps_bat_heater_1_mode.set_text("Automatic")
+        self.label_eps_bat_heater_2_mode.set_text("Automatic")
+        self.label_eps_bat_temp_monitor.set_text("0 °C")
+        self.label_eps_bat_status.set_text("-")
+        self.label_eps_bat_protection.set_text("-")
+        self.label_eps_bat_cycle_counter.set_text("0")
+        self.label_eps_bat_raac.set_text("0 mAh")
+        self.label_eps_bat_rsac.set_text("0 mAh")
+        self.label_eps_bat_rarc.set_text("0 %")
+        self.label_eps_bat_rsrc.set_text("0 %")
+
+    def _load_default_values_obdh(self):
+        self.label_obdh_mcu_date.set_text("1970/01/01")
+        self.label_obdh_mcu_time.set_text("00:00:00")
+        self.label_obdh_mcu_temp.set_text("0 °C")
+        self.label_obdh_mcu_last_reset_cause.set_text("0")
+        self.label_obdh_mcu_reset_count.set_text("0")
+        self.label_obdh_general_voltage.set_text("0 mV")
+        self.label_obdh_general_current.set_text("0 mA")
+        self.label_obdh_mem_sec_obdh.set_text("0")
+        self.label_obdh_mem_sec_eps.set_text("0")
+        self.label_obdh_mem_sec_ttc_0.set_text("0")
+        self.label_obdh_mem_sec_ttc_1.set_text("0")
+        self.label_obdh_mem_sec_payload.set_text("0")
+        self.label_obdh_position_lattitude.set_text("0°")
+        self.label_obdh_position_longitude.set_text("0°")
+        self.label_obdh_position_altitude.set_text("0 km")
+        self.label_obdh_position_date.set_text("1970/01/01")
+        self.label_obdh_position_time.set_text("00:00:00")
+        self.textbuffer_obdh_position_tle.set_text(
+                "25544U 98067A   25054.44635474  .00024560  00000+0  44723-3 0  9992\n" +
+                "25544  51.6356 150.3745 0005991 304.7544  55.2880 15.49325184497521")
+        self.label_obdh_position_date.set_text("1970/01/01")
+        self.label_obdh_position_time.set_text("00:00:00")
+        self.label_obdh_op_last_valid_tc.set_text("0")
+        self.label_obdh_op_mode.set_text("Normal")
+        self.label_obdh_op_date_last_mode_change.set_text("1970/01/01")
+        self.label_obdh_op_time_last_mode_change.set_text("00:00:00")
+        self.label_obdh_op_mode_duration.set_text("0 sec")
+        self.label_obdh_op_initial_hib.set_text("Not Executed")
+        self.label_obdh_op_initial_hib_time.set_text("0 min")
+        self.label_obdh_op_manual_mode.set_text("Enabled")
+        self.label_obdh_op_general_tm.set_text("Enabled")
+        self.label_obdh_op_pl_state.set_text("0")
+        self.label_obdh_op_date_last_reading.set_text("1970/01/01")
+        self.label_obdh_op_time_last_reading.set_text("00:00:00")
+        self.label_obdh_op_remaining_hib_time.set_text("0 sec")
+
+    def _load_default_values_ttc(self):
+        self.label_ttc_mcu1_date.set_text("1970/01/01")
+        self.label_ttc_mcu1_time.set_text("00:00:00")
+        self.label_ttc_mcu1_temp.set_text("0 °C")
+        self.label_ttc_mcu1_last_rst_cause.set_text("0")
+        self.label_ttc_mcu1_rst_count.set_text("0")
+        self.label_ttc_mcu1_volt.set_text("0 mV")
+        self.label_ttc_mcu1_curr.set_text("0 mA")
+        self.label_ttc_radio1_volt.set_text("0 mV")
+        self.label_ttc_radio1_curr.set_text("0 mA")
+        self.label_ttc_radio1_temp.set_text("0 °C")
+        self.label_ttc_radio1_tx_en.set_text("False")
+        self.label_ttc_radio1_count.set_text("0")
+        self.label_ttc_mcu1_date.set_text("1970/01/01")
+        self.label_ttc_mcu1_time.set_text("00:00:00")
+        self.label_ttc_mcu1_temp.set_text("0 °C")
+        self.label_ttc_mcu1_last_rst_cause.set_text("0")
+        self.label_ttc_mcu1_rst_count.set_text("0")
+        self.label_ttc_mcu1_volt.set_text("0 mV")
+        self.label_ttc_mcu1_curr.set_text("0 mA")
+        self.label_ttc_radio2_volt.set_text("0 mV")
+        self.label_ttc_radio2_curr.set_text("0 mA")
+        self.label_ttc_radio2_temp.set_text("0 °C")
+        self.label_ttc_radio2_tx_en.set_text("False")
+        self.label_ttc_radio2_tx_count.set_text("0")
+        self.label_ttc_radio2_rx_count.set_text("0")
+
+    def _load_default_values_lora(self):
+        self.label_lora_fsat2a_ts.set_text("1970/01/01 - 00:00:00")
+        self.label_lora_fsat2a_id.set_text("0")
+        self.label_lora_fsat2a_pkt_cnt.set_text("0")
+        self.label_lora_fsat2a_temp.set_text("0 °C")
+        self.label_lora_fsat2a_rssi.set_text("0 dB")
+        self.label_lora_fsat2a_snr.set_text("0 dB")
+        self.label_lora_fsat2a_freq_err.set_text("0 Hz")
+        self.label_lora_fsat2b_ts.set_text("1970/01/01 - 00:00:00")
+        self.label_lora_fsat2b_id.set_text("0")
+        self.label_lora_fsat2b_pkt_cnt.set_text("0")
+        self.label_lora_fsat2b_temp.set_text("0 °C")
+        self.label_lora_fsat2b_rssi.set_text("0 dB")
+        self.label_lora_fsat2b_snr.set_text("0 dB")
+        self.label_lora_fsat2b_freq_err.set_text("0 Hz")
+        self.label_lora_fsat2b_bat_volt.set_text("0 mV")
+
+    def _create_socket_server(self, adr, port):
+        """Create a TCP/IP socket server"""
+        try:
+            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            server_socket.bind((adr, port))
+            server_socket.listen(1)
+            return server_socket
+        except socket.error as e:
+            error_dialog = Gtk.MessageDialog(None, 0, Gtk.MessageType.ERROR, Gtk.ButtonsType.OK, "Error creating a socket server!")
+            error_dialog.format_secondary_text(str(e))
+            error_dialog.run()
+            error_dialog.destroy()
+            return None
+
+    def _handle_new_connection(self, source, condition):
+        """Handle incoming connections"""
+        if condition == GLib.IO_IN:
+            client_socket, address = self._server_socket.accept()
+
+            # Create an IOChannel for the client socket to handle incoming data
+            client_io_channel = GLib.IOChannel(client_socket.fileno())
+            client_io_channel.set_encoding(None)  # Binary mode (important for raw data)
+
+            # Monitor the client socket for incoming data
+            GLib.io_add_watch(client_io_channel, GLib.IO_IN, self._handle_data, client_socket)
+
+        return True  # Keep the handler active
+
+    def _handle_data(self, source, condition, client_socket):
+        """Handle incoming data from the client"""
+        if condition == GLib.IO_IN:
+            try:
+                data = client_socket.recv(2048)  # Read incoming data (max 1024 bytes)
+                if data:
+                    self._decode_pkt(data)
+                else:
+                    # Connection closed by client
+                    client_socket.close()
+                    return False  # Stop the IO watch for this client
+            except socket.error as e:
+                client_socket.close()
+                return False  # Stop the IO watch for this client
+        return True  # Keep the handler active
