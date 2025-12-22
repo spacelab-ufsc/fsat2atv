@@ -285,14 +285,10 @@ class FSat2ATV:
     def _decode_pkt(self, pkt_json):
         data = json.loads(pkt_json)
 
-        if "obdh_timestamp" in data:
-            self._database.set_timestamp(datetime.datetime.strptime(data["obdh_timestamp"], '%Y/%m/%d - %H:%M:%S'))
-        elif "eps_timestamp" in data:
-            self._database.set_timestamp(datetime.datetime.strptime(data["eps_timestamp"], '%Y/%m/%d - %H:%M:%S'))
-
         if "eps_timestamp" in data:
             self.label_eps_mcu_date.set_text(data["eps_timestamp"][:12])
             self.label_eps_mcu_time.set_text(data["eps_timestamp"][12:])
+            self._database.set_timestamp(datetime.datetime.strptime(data["eps_timestamp"], '%Y/%m/%d - %H:%M:%S'))
             self._database.write("eps_timestamp", "string", data["eps_timestamp"])
 #            self.label_eps_mcu_time.override_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0, 1, 0, 1))
 #        else:
@@ -487,6 +483,7 @@ class FSat2ATV:
         if "obdh_timestamp" in data:
             self.label_obdh_mcu_date.set_text(data["obdh_timestamp"][:12])
             self.label_obdh_mcu_time.set_text(data["obdh_timestamp"][12:])
+            self._database.set_timestamp(datetime.datetime.strptime(data["obdh_timestamp"], '%Y/%m/%d - %H:%M:%S'))
             self._database.write("obdh_timestamp", "string", data["obdh_timestamp"], "")
 
         if "obdh_mcu_temp" in data:
@@ -657,6 +654,12 @@ class FSat2ATV:
             self.label_ttc_radio2_temp.set_text(str(float(data["ttc_radio1_temp"])) + " " + "°C")
             self._database.write("ttc_radio1_temp", "float", str(float(data["ttc_radio1_temp"])), "°C ")
 
+        if "lora_fsat2a_ts" in data:
+            self.label_lora_fsat2a_ts.set_text(data["lora_fsat2a_ts"])
+            self.label_lora_fsat2b_ts.set_text(data["lora_fsat2a_ts"])
+            self._database.set_timestamp(datetime.datetime.strptime(data["lora_fsat2a_ts"], '%Y/%m/%d - %H:%M:%S'))
+            self._database.write("lora_fsat2a_ts", "string", data["lora_fsat2a_ts"], "")
+
         if "lora_fsat2a_sat_id" in data:
             self.label_lora_fsat2a_id.set_text(str(int(data["lora_fsat2a_sat_id"])))
             self._database.write("lora_fsat2a_sat_id", "uint8", str(int(data["lora_fsat2a_sat_id"])), "")
@@ -708,11 +711,6 @@ class FSat2ATV:
         if "lora_fsat2b_bat_volt" in data:
             self.label_lora_fsat2b_bat_volt.set_text(str(int(data["lora_fsat2b_bat_volt"])) + " " + "mV")
             self._database.write("lora_fsat2b_bat_volt", "uint16", str(int(data["lora_fsat2b_bat_volt"])), "mV")
-
-        if "lora_fsat2a_ts" in data:
-            self.label_lora_fsat2a_ts.set_text(data["lora_fsat2a_ts"])
-            self.label_lora_fsat2b_ts.set_text(data["lora_fsat2a_ts"])
-            self._database.write("lora_fsat2a_ts", "string", data["lora_fsat2a_ts"], "")
 
     def _load_default_values_eps(self):
         self.label_eps_mcu_date.set_text("1970/01/01")
