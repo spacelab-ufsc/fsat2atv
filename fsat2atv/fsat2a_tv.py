@@ -34,6 +34,7 @@ from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
 
 import fsat2atv.version
 import fsat2atv.convert
+from fsat2atv.database import Database
 
 # UI File
 _UI_FILE_LOCAL                  = os.path.abspath(os.path.dirname(__file__)) + '/data/ui/fsat2atv.glade'
@@ -71,6 +72,8 @@ class FSat2ATV:
         self._build_widgets()
 
         self._server_socket = None
+
+        self._database = Database('fsat2a-data.db')
 
     def _build_widgets(self):
         # Main window
@@ -283,343 +286,432 @@ class FSat2ATV:
         data = json.loads(pkt_json)
 
         if "eps_timestamp" in data:
-            self.label_eps_mcu_date.set_text(datetime.datetime.fromtimestamp(int(data["eps_timestamp"])).strftime('%Y/%m/%d'))
-            self.label_eps_mcu_time.set_text(datetime.datetime.fromtimestamp(int(data["eps_timestamp"])).strftime('%H:%M:%S'))
+            self.label_eps_mcu_date.set_text(data["eps_timestamp"][:10])
+            self.label_eps_mcu_time.set_text(data["eps_timestamp"][10:])
+            self._database.set_timestamp(datetime.datetime.strptime(data["eps_timestamp"], '%Y/%m/%d - %H:%M:%S'))
+            self._database.write("eps_timestamp", "string", data["eps_timestamp"])
 #            self.label_eps_mcu_time.override_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0, 1, 0, 1))
-#        else:
+        else:
 #            self.label_eps_mcu_time.override_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0, 0, 0, 1))
+            self._database.set_timestamp(datetime.datetime.strptime(data["obdh_timestamp"], '%Y/%m/%d - %H:%M:%S'))
 
         if "eps_mcu_temp" in data:
-            self.label_eps_mcu_temp.set_text(str((int(data["eps_mcu_temp"]) - 273)) + " " + "°C")
+            self.label_eps_mcu_temp.set_text(str(int(data["eps_mcu_temp"]) - 273) + " " + "°C")
+            self._database.write("eps_mcu_temp", "int16", str(int(data["eps_mcu_temp"]) - 273), "°C")
 
         if "eps_mcu_curr" in data:
             self.label_eps_mcu_curr.set_text(data["eps_mcu_curr"] + " " + "mA")
+            self._database.write("eps_mcu_curr", "uint16", data["eps_mcu_curr"], "mA")
 
         if "eps_mcu_last_rst_cause" in data:
             self.label_eps_mcu_last_reset_cause.set_text(data["eps_mcu_last_rst_cause"])
+            self._database.write("eps_mcu_last_rst_cause", "uint8", data["eps_mcu_last_rst_cause"], "")
 
         if "eps_mcu_rst_count" in data:
             self.label_eps_mcu_reset_count.set_text(data["eps_mcu_rst_count"])
+            self._database.write("eps_mcu_rst_count", "uint16", data["eps_mcu_rst_count"], "")
 
         if "eps_sp_volt_mypx" in data:
             self.label_eps_sp_volt_mypx.set_text(data["eps_sp_volt_mypx"] + " " + "mV")
+            self._database.write("eps_sp_volt_mypx", "uint16", data["eps_sp_volt_mypx"], "mV")
 
         if "eps_sp_volt_mxpz" in data:
             self.label_eps_sp_volt_mxpz.set_text(data["eps_sp_volt_mxpz"] + " " + "mV")
+            self._database.write("eps_sp_volt_mxpz", "uint16", data["eps_sp_volt_mxpz"], "mV")
 
         if "eps_sp_volt_mzpy" in data:
             self.label_eps_sp_volt_mzpy.set_text(data["eps_sp_volt_mzpy"] + " " + "mV")
+            self._database.write("eps_sp_volt_mzpy", "uint16", data["eps_sp_volt_mzpy"], "mV")
 
         if "eps_sp_curr_mx" in data:
             self.label_eps_sp_curr_mx.set_text(data["eps_sp_curr_mx"] + " " + "mA")
+            self._database.write("eps_sp_curr_mx", "uint16", data["eps_sp_curr_mx"], "mA")
 
         if "eps_sp_curr_px" in data:
             self.label_eps_sp_curr_px.set_text(data["eps_sp_curr_px"] + " " + "mA")
+            self._database.write("eps_sp_curr_px", "uint16", data["eps_sp_curr_px"], "mA")
 
         if "eps_sp_curr_my" in data:
             self.label_eps_sp_curr_my.set_text(data["eps_sp_curr_my"] + " " + "mA")
+            self._database.write("eps_sp_curr_my", "uint16", data["eps_sp_curr_my"], "mA")
 
         if "eps_sp_curr_py" in data:
             self.label_eps_sp_curr_py.set_text(data["eps_sp_curr_py"] + " " + "mA")
+            self._database.write("eps_sp_curr_py", "uint16", data["eps_sp_curr_py"], "mA")
 
         if "eps_sp_curr_mz" in data:
             self.label_eps_sp_curr_mz.set_text(data["eps_sp_curr_mz"] + " " + "mA")
+            self._database.write("eps_sp_curr_mz", "uint16", data["eps_sp_curr_mz"], "mA")
 
         if "eps_sp_curr_pz" in data:
             self.label_eps_sp_curr_pz.set_text(data["eps_sp_curr_pz"] + " " + "mA")
+            self._database.write("eps_sp_curr_pz", "uint16", data["eps_sp_curr_pz"], "mA")
 
         if "eps_mppt_1_dc" in data:
             self.label_eps_mppt_dc_ch_1.set_text(data["eps_mppt_1_dc"] + " " + "%")
+            self._database.write("eps_mppt_1_dc", "uint8", data["eps_mppt_1_dc"], "%")
 
         if "eps_mppt_2_dc" in data:
             self.label_eps_mppt_dc_ch_2.set_text(data["eps_mppt_2_dc"] + " " + "%")
+            self._database.write("eps_mppt_2_dc", "uint8", data["eps_mppt_2_dc"], "%")
 
         if "eps_mppt_3_dc" in data:
             self.label_eps_mppt_dc_ch_3.set_text(data["eps_mppt_3_dc"] + " " + "%")
+            self._database.write("eps_mppt_3_dc", "uint8", data["eps_mppt_3_dc"], "%")
 
         if "eps_mppt_1_mode" in data:
             if int(data["eps_mppt_1_mode"]) == 0:
                 self.label_eps_mppt_mode_ch_1.set_text("Automatic")
+                self._database.write("eps_mppt_1_mode", "string", "Automatic", "")
             elif int(data["eps_mppt_1_mode"]) == 1:
                 self.label_eps_mppt_mode_ch_1.set_text("Manual")
+                self._database.write("eps_mppt_1_mode", "string", "Manual", "")
             else:
                 self.label_eps_mppt_mode_ch_1.set_text("Unknown")
+                self._database.write("eps_mppt_1_mode", "string", "Unknown", "")
 
         if "eps_mppt_2_mode" in data:
             if int(data["eps_mppt_2_mode"]) == 0:
                 self.label_eps_mppt_mode_ch_2.set_text("Automatic")
+                self._database.write("eps_mppt_2_mode", "string", "Automatic", "")
             elif int(data["eps_mppt_2_mode"]) == 1:
                 self.label_eps_mppt_mode_ch_2.set_text("Manual")
+                self._database.write("eps_mppt_2_mode", "string", "Manual", "")
             else:
                 self.label_eps_mppt_mode_ch_2.set_text("Unknown")
+                self._database.write("eps_mppt_2_mode", "string", "Unknown", "")
 
         if "eps_mppt_3_mode" in data:
             if int(data["eps_mppt_3_mode"]) == 0:
                 self.label_eps_mppt_mode_ch_3.set_text("Automatic")
+                self._database.write("eps_mppt_3_mode", "string", "Automatic", "")
             elif int(data["eps_mppt_3_mode"]) == 1:
                 self.label_eps_mppt_mode_ch_3.set_text("Manual")
+                self._database.write("eps_mppt_3_mode", "string", "Manual", "")
             else:
                 self.label_eps_mppt_mode_ch_3.set_text("Unknown")
+                self._database.write("eps_mppt_3_mode", "string", "Unknown", "")
 
         if "eps_mppt_sp_volt" in data:
             self.label_eps_mppt_output_volt.set_text(data["eps_mppt_sp_volt"] + " " + "mV")
+            self._database.write("eps_mppt_sp_volt", "uint16", data["eps_mppt_sp_volt"], "mV")
 
         if "eps_rtd_0_temp" in data:
             self.label_eps_rtd_ch_0.set_text(str(int(data["eps_rtd_0_temp"]) - 273) + " " + "°C")
+            self._database.write("eps_rtd_0_temp", "int16", str(int(data["eps_rtd_0_temp"]) - 273), "°C")
 
         if "eps_rtd_1_temp" in data:
             self.label_eps_rtd_ch_1.set_text(str(int(data["eps_rtd_1_temp"]) - 273) + " " + "°C")
+            self._database.write("eps_rtd_1_temp", "int16", str(int(data["eps_rtd_1_temp"]) - 273), "°C")
 
         if "eps_rtd_2_temp" in data:
             self.label_eps_rtd_ch_2.set_text(str(int(data["eps_rtd_2_temp"]) - 273) + " " + "°C")
+            self._database.write("eps_rtd_2_temp", "int16", str(int(data["eps_rtd_2_temp"]) - 273), "°C")
 
         if "eps_rtd_3_temp" in data:
             self.label_eps_rtd_ch_3.set_text(str(int(data["eps_rtd_3_temp"]) - 273) + " " + "°C")
+            self._database.write("eps_rtd_3_temp", "int16", str(int(data["eps_rtd_3_temp"]) - 273), "°C")
 
         if "eps_rtd_4_temp" in data:
             self.label_eps_rtd_ch_4.set_text(str(int(data["eps_rtd_4_temp"]) - 273) + " " + "°C")
+            self._database.write("eps_rtd_4_temp", "int16", str(int(data["eps_rtd_4_temp"]) - 273), "°C")
 
         if "eps_rtd_5_temp" in data:
             self.label_eps_rtd_ch_5.set_text(str(int(data["eps_rtd_5_temp"]) - 273) + " " + "°C")
+            self._database.write("eps_rtd_5_temp", "int16", str(int(data["eps_rtd_5_temp"]) - 273), "°C")
 
         if "eps_rtd_6_temp" in data:
             self.label_eps_rtd_ch_6.set_text(str(int(data["eps_rtd_6_temp"]) - 273) + " " + "°C")
+            self._database.write("eps_rtd_6_temp", "int16", str(int(data["eps_rtd_6_temp"]) - 273), "°C")
 
         if "eps_bat_volt" in data:
             self.label_eps_bat_volt.set_text(data["eps_bat_volt"] + " " + "mV")
+            self._database.write("eps_bat_volt", "uint16", data["eps_bat_volt"], "mV")
 
         if "eps_bat_curr" in data:
             self.label_eps_bat_curr.set_text(data["eps_bat_curr"] + " " + "mA")
+            self._database.write("eps_bat_curr", "int16", data["eps_bat_curr"], "mA")
 
         if "eps_bat_avg_curr" in data:
             self.label_eps_bat_average_curr.set_text(data["eps_bat_avg_curr"] + " " + "mA")
+            self._database.write("eps_bat_avg_curr", "uint16", data["eps_bat_avg_curr"], "mA")
 
         if "eps_bat_acc_curr" in data:
-            self.label_eps_bat_acc_curr.set_text(data["eps_bat_acc_curr"] + " " + "mA")
+            self.label_eps_bat_acc_curr.set_text(data["eps_bat_acc_curr"] + " " + "mAh")
+            self._database.write("eps_bat_acc_curr", "uint16", data["eps_bat_acc_curr"], "mAh")
 
         if "eps_bat_charge" in data:
             self.label_eps_bat_charge.set_text(data["eps_bat_charge"] + " " + "mAh")
+            self._database.write("eps_bat_charge", "uint16", data["eps_bat_charge"], "mAh")
 
         if "eps_bat_heater_1_dc" in data:
             self.label_eps_bat_heater_1_dc.set_text(data["eps_bat_heater_1_dc"] + " " + "%")
+            self._database.write("eps_bat_heater_1_dc", "uint8", data["eps_bat_heater_1_dc"], "%")
 
         if "eps_bat_heater_2_dc" in data:
             self.label_eps_bat_heater_2_dc.set_text(data["eps_bat_heater_2_dc"] + " " + "%")
+            self._database.write("eps_bat_heater_2_dc", "uint8", data["eps_bat_heater_2_dc"], "%")
 
         if "eps_bat_heater_1_mode" in data:
             if int(data["eps_bat_heater_1_mode"]) == 0:
                 self.label_eps_bat_heater_1_mode.set_text("Automatic")
+                self._database.write("eps_bat_heater_1_mode", "string", "Automatic", "")
             elif int(data["eps_bat_heater_1_mode"]) == 1:
                 self.label_eps_bat_heater_1_mode.set_text("Manual")
+                self._database.write("eps_bat_heater_1_mode", "string", "Manual", "")
             else:
                 self.label_eps_bat_heater_1_mode.set_text("Unknown")
+                self._database.write("eps_bat_heater_1_mode", "string", "Unknown", "")
 
         if "eps_bat_heater_2_mode" in data:
             if int(data["eps_bat_heater_2_mode"]) == 0:
                 self.label_eps_bat_heater_2_mode.set_text("Automatic")
+                self._database.write("eps_bat_heater_2_mode", "string", "Automatic", "")
             elif int(data["eps_bat_heater_2_mode"]) == 1:
                 self.label_eps_bat_heater_2_mode.set_text("Manual")
+                self._database.write("eps_bat_heater_2_mode", "string", "Manual", "")
             else:
                 self.label_eps_bat_heater_2_mode.set_text("Unknown")
+                self._database.write("eps_bat_heater_2_mode", "string", "Unknown", "")
 
         if "eps_bat_mon_temp" in data:
-            self.label_eps_bat_temp_monitor.set_text(str((int(data["eps_bat_mon_temp"]) - 273)) + " " + "°C")
+            self.label_eps_bat_temp_monitor.set_text(str(int(data["eps_bat_mon_temp"]) - 273) + " " + "°C")
+            self._database.write("eps_bat_mon_temp", "uint16", str(int(data["eps_bat_mon_temp"]) - 273), "°C")
 
 #        if "eps_main_pwr_bus_volt" in data:
 #            self..set_text(data["eps_main_pwr_bus_volt"] + " " + "mV")
 
-        '''
-        if "" in data:
-            self.label_eps_bat_protection.set_text()
-
-        if "" in data:
-            self.label_eps_bat_cycle_counter.set_text()
-
-        if "" in data:
-            self.label_eps_bat_raac.set_text()
-
-        if "" in data:
-            self.label_eps_bat_rsac.set_text()
-
-        if "" in data:
-            self.label_eps_bat_rarc.set_text()
-
-        if "" in data:
-            self.label_eps_bat_rsrc.set_text()
-        '''
         if "obdh_timestamp" in data:
-            self.label_obdh_mcu_date.set_text(datetime.datetime.fromtimestamp(int(data["obdh_timestamp"])).strftime('%Y/%m/%d'))
-            self.label_obdh_mcu_time.set_text(datetime.datetime.fromtimestamp(int(data["obdh_timestamp"])).strftime('%H:%M:%S'))
+            self.label_obdh_mcu_date.set_text(data["obdh_timestamp"][:10])
+            self.label_obdh_mcu_time.set_text(data["obdh_timestamp"][10:])
+            self._database.set_timestamp(datetime.datetime.strptime(data["obdh_timestamp"], '%Y/%m/%d - %H:%M:%S'))
+            self._database.write("obdh_timestamp", "string", data["obdh_timestamp"], "")
 
         if "obdh_mcu_temp" in data:
-            self.label_obdh_mcu_temp.set_text(str((int(data["obdh_mcu_temp"]) - 273)) + " " + "°C")
+            self.label_obdh_mcu_temp.set_text(str(int(data["obdh_mcu_temp"]) - 273) + " " + "°C")
+            self._database.write("obdh_mcu_temp", "int16", str(int(data["obdh_mcu_temp"]) - 273), "°C")
 
         if "obdh_mcu_last_rst_cause" in data:
             self.label_obdh_mcu_last_reset_cause.set_text(data["obdh_mcu_last_rst_cause"])
+            self._database.write("obdh_mcu_last_rst_cause", "uint8", data["obdh_mcu_last_rst_cause"], "")
 
         if "obdh_mcu_rst_count" in data:
             self.label_obdh_mcu_reset_count.set_text(data["obdh_mcu_rst_count"])
+            self._database.write("obdh_mcu_rst_count", "uint16", data["obdh_mcu_rst_count"], "")
 
         if "obdh_volt" in data:
             self.label_obdh_general_voltage.set_text(data["obdh_volt"] + " " + "mV")
+            self._database.write("obdh_volt", "uint16", data["obdh_volt"], "mV")
 
         if "obdh_curr" in data:
             self.label_obdh_general_current.set_text(data["obdh_curr"] + " " + "mA")
+            self._database.write("obdh_curr", "uint16", data["obdh_curr"], "mA")
 
 #        if "obdh_mem_data_log" in data:
 #            self..set_text(data["obdh_mem_data_log"])
 
         if "obdh_mem_sec_obdh" in data:
             self.label_obdh_mem_sec_obdh.set_text(data["obdh_mem_sec_obdh"])
+            self._database.write("obdh_mem_sec_obdh", "uint32", data["obdh_mem_sec_obdh"], "")
 
         if "obdh_mem_sec_eps" in data:
             self.label_obdh_mem_sec_eps.set_text(data["obdh_mem_sec_eps"])
+            self._database.write("obdh_mem_sec_eps", "uint32", data["obdh_mem_sec_eps"], "")
 
         if "obdh_mem_sec_ttc_0" in data:
             self.label_obdh_mem_sec_ttc_0.set_text(data["obdh_mem_sec_ttc_0"])
+            self._database.write("obdh_mem_sec_ttc_0", "uint32", data["obdh_mem_sec_ttc_0"], "")
 
         if "obdh_mem_sec_ttc_1" in data:
             self.label_obdh_mem_sec_ttc_1.set_text(data["obdh_mem_sec_ttc_1"])
+            self._database.write("obdh_mem_sec_ttc_1", "uint32", data["obdh_mem_sec_ttc_1"], "")
 
         if "obdh_mem_sec_pl" in data:
             self.label_obdh_pl_sec_antenna.set_text(data["obdh_mem_sec_pl"])
+            self._database.write("obdh_mem_sec_pl", "uint32", data["obdh_mem_sec_pl"], "")
 
         if "obdh_pos_lat" in data:
             self.label_obdh_position_lattitude.set_text(data["obdh_pos_lat"] + "°")
+            self._database.write("obdh_pos_lat", "int16", data["obdh_pos_lat"], "°")
 
         if "obdh_pos_lon" in data:
             self.label_obdh_position_longitude.set_text(data["obdh_pos_lon"] + "°")
+            self._database.write("obdh_pos_lon", "int16", data["obdh_pos_lon"], "°")
 
         if "obdh_pos_alt" in data:
             self.label_obdh_position_altitude.set_text(data["obdh_pos_alt"] + " " + "km")
+            self._database.write("obdh_pos_alt", "uint16", data["obdh_pos_alt"], "km")
 
         if "obdh_pos_ts" in data:
-            self.label_obdh_position_date.set_text(datetime.datetime.fromtimestamp(int(data["obdh_pos_ts"])).strftime('%Y/%m/%d'))
-            self.label_obdh_position_time.set_text(datetime.datetime.fromtimestamp(int(data["obdh_pos_ts"])).strftime('%H:%M:%S'))
+            self.label_obdh_position_date.set_text(data["obdh_pos_ts"][:10])
+            self.label_obdh_position_time.set_text(data["obdh_pos_ts"][10:])
+            self._database.write("obdh_pos_ts", "string", data["obdh_pos_ts"], "")
 
         if "obdh_pos_tle_line_1" in data:
             self.textbuffer_obdh_position_tle.set_text(data["obdh_pos_tle_line_1"])
+            self._database.write("obdh_pos_tle_line_1", "string", data["obdh_pos_tle_line_1"], "")
 
         if "obdh_pos_tle_line_2" in data:
             self.textbuffer_obdh_position_tle.set_text(data["obdh_pos_tle_line_2"])
+            self._database.write("obdh_pos_tle_line_2", "string", data["obdh_pos_tle_line_2"], "")
 
         if "obdh_pos_last_tle_upd_ts" in data:
-            self.label_obdh_position_date.set_text(datetime.datetime.fromtimestamp(int(data["obdh_pos_last_tle_upd_ts"])).strftime('%Y/%m/%d'))
-            self.label_obdh_position_time.set_text(datetime.datetime.fromtimestamp(int(data["obdh_pos_last_tle_upd_ts"])).strftime('%H:%M:%S'))
+            self.label_obdh_position_date.set_text(data["obdh_pos_last_tle_upd_ts"][:10])
+            self.label_obdh_position_time.set_text(data["obdh_pos_last_tle_upd_ts"][10:])
+            self._database.write("obdh_pos_last_tle_upd_ts", "string", data["obdh_pos_last_tle_upd_ts"], "")
 
         if "obdh_op_last_val_tc" in data:
             self.label_obdh_op_last_valid_tc.set_text(data["obdh_op_last_val_tc"])
+            self._database.write("obdh_op_last_val_tc", "uint8", data["obdh_op_last_val_tc"], "")
 
         if "obdh_op_mode" in data:
             if int(data["obdh_op_mode"]) == 0:
                 self.label_obdh_op_mode.set_text("Normal")
+                self._database.write("obdh_op_mode", "string", "Normal", "")
             elif int(data["obdh_op_mode"]) == 1:
                 self.label_obdh_op_mode.set_text("Hibernation")
+                self._database.write("obdh_op_mode", "string", "Hibernation", "")
             elif int(data["obdh_op_mode"]) == 2:
                 self.label_obdh_op_mode.set_text("Standby")
+                self._database.write("obdh_op_mode", "string", "Standby", "")
             else:
                 self.label_obdh_op_mode.set_text("Unknown")
+                self._database.write("obdh_op_mode", "string", "Unknown", "")
 
         if "obdh_op_last_mode_change_ts" in data:
-            self.label_obdh_op_date_last_mode_change.set_text(datetime.datetime.fromtimestamp(int(data["obdh_op_last_mode_change_ts"])).strftime('%Y/%m/%d'))
-            self.label_obdh_op_time_last_mode_change.set_text(datetime.datetime.fromtimestamp(int(data["obdh_op_last_mode_change_ts"])).strftime('%H:%M:%S'))
+            self.label_obdh_op_date_last_mode_change.set_text(data["obdh_op_last_mode_change_ts"][:10])
+            self.label_obdh_op_time_last_mode_change.set_text(data["obdh_op_last_mode_change_ts"][10:])
+            self._database.write("obdh_op_last_mode_change_ts", "string", data["obdh_op_last_mode_change_ts"], "")
 
         if "obdh_op_mode_dur" in data:
             self.label_obdh_op_mode_duration.set_text(data["obdh_op_mode_dur"] + " " + "sec")
+            self._database.write("obdh_op_mode_dur", "uint16", data["obdh_op_mode_dur"], "sec")
 
         if "obdh_op_init_hib" in data:
             if int(data["obdh_op_init_hib"]) == 0:
                 self.label_obdh_op_initial_hib.set_text("Not Executed")
+                self._database.write("obdh_op_init_hib", "string", "Not Executed", "")
             if int(data["obdh_op_init_hib"]) == 1:
                 self.label_obdh_op_initial_hib.set_text("Executed")
+                self._database.write("obdh_op_init_hib", "string", "Executed", "")
             else:
                 self.label_obdh_op_initial_hib.set_text("Unknown")
+                self._database.write("obdh_op_init_hib", "string", "Unknown", "")
 
         if "obdh_op_init_hib_time" in data:
             self.label_obdh_op_initial_hib_time.set_text(data["obdh_op_init_hib_time"] + " " + "min")
+            self._database.write("obdh_op_init_hib_time", "uint16", data["obdh_op_init_hib_time"], "min")
 
         if "obdh_op_manual_mode" in data:
             if int(data["obdh_op_manual_mode"]) == 0:
                 self.label_obdh_op_manual_mode.set_text("Disabled")
+                self._database.write("obdh_op_manual_mode", "string", "Disabled", "")
             elif int(data["obdh_op_manual_mode"]) == 1:
                 self.label_obdh_op_manual_mode.set_text("Enabled")
+                self._database.write("obdh_op_manual_mode", "string", "Enabled", "")
             else:
                 self.label_obdh_op_manual_mode.set_text("Unknown")
+                self._database.write("obdh_op_manual_mode", "string", "Unknown", "")
 
         if "obdh_op_general_tm" in data:
             if int(data["obdh_op_general_tm"]) == 0:
                 self.label_obdh_op_general_tm.set_text("Disabled")
+                self._database.write("obdh_op_general_tm", "string", "Disabled", "")
             elif int(data["obdh_op_general_tm"]) == 1:
                 self.label_obdh_op_general_tm.set_text("Enabled")
+                self._database.write("obdh_op_general_tm", "string", "Enabled", "")
             else:
                 self.label_obdh_op_general_tm.set_text("Unknown")
+                self._database.write("obdh_op_general_tm", "string", "Unknown", "")
 
         if "obdh_op_pl_main_state" in data:
             if int(data["obdh_op_pl_main_state"]) == 0:
                 self.label_obdh_op_main_pl_state.set_text("Disabled")
+                self._database.write("obdh_op_pl_main_state", "string", "Disabled", "")
             else:
-                self.label_obdh_op_main_pl_state.set_text(data["obdh_op_main_pl_state"])
+                self.label_obdh_op_main_pl_state.set_text("Enabled")
+                self._database.write("obdh_op_pl_main_state", "string", "Enabled", "")
 
         if "obdh_op_last_reading_ts" in data:
-            self.label_obdh_op_date_last_reading.set_text(datetime.datetime.fromtimestamp(int(data["obdh_op_last_reading_ts"])).strftime('%Y/%m/%d'))
-            self.label_obdh_op_date_last_reading.set_text(datetime.datetime.fromtimestamp(int(data["obdh_op_last_reading_ts"])).strftime('%H:%M:%S'))
+            self.label_obdh_op_date_last_reading.set_text(data["obdh_op_last_reading_ts"][:10])
+            self.label_obdh_op_date_last_reading.set_text(data["obdh_op_last_reading_ts"][10:])
+            self._database.write("obdh_op_last_reading_ts", "string", data["obdh_op_last_reading_ts"], "")
 
         if "obdh_op_remaining_hib_time" in data:
             self.label_obdh_op_remaining_hib_time.set_text(data["obdh_op_remaining_hib_time"] + " " + "min")
+            self._database.write("obdh_op_remaining_hib_time", "uint16", data["obdh_op_remaining_hib_time"], "min")
 
         if "obdh_last_valid_tc_rssi" in data:
-            self.label_obdh_op_date_last_reading.set_text(datetime.datetime.fromtimestamp(int(data["obdh_last_valid_tc_rssi"])).strftime('%Y/%m/%d'))
-            self.label_obdh_op_time_last_reading.set_text(datetime.datetime.fromtimestamp(int(data["obdh_last_valid_tc_rssi"])).strftime('%H:%M:%S'))
+            self.label_obdh_op_date_last_reading.set_text(data["obdh_last_valid_tc_rssi"][:10])
+            self.label_obdh_op_time_last_reading.set_text(data["obdh_last_valid_tc_rssi"][10:])
+            self._database.write("obdh_last_valid_tc_rssi", "int16", data["obdh_last_valid_tc_rssi"], "dB")
 
         if "obdh_sensor_read_ts" in data:
-            self.label_obdh_op_date_last_reading.set_text(datetime.datetime.fromtimestamp(int(data["obdh_sensor_read_ts"])).strftime('%Y/%m/%d'))
-            self.label_obdh_op_time_last_reading.set_text(datetime.datetime.fromtimestamp(int(data["obdh_sensor_read_ts"])).strftime('%H:%M:%S'))
+            self.label_obdh_op_date_last_reading.set_text(data["obdh_sensor_read_ts"][:10])
+            self.label_obdh_op_time_last_reading.set_text(data["obdh_sensor_read_ts"][10:])
+            self._database.write("obdh_sensor_read_ts", "string", data["obdh_sensor_read_ts"], "")
 
         if "ttc_radio1_temp" in data:
             self.label_ttc_radio2_temp.set_text(str(float(data["ttc_radio1_temp"])) + " " + "°C")
-
-        if "lora_fsat2a_sat_id" in data:
-            self.label_lora_fsat2a_id.set_text(str(int(data["lora_fsat2a_sat_id"])))
-
-        if "lora_fsat2a_pkt_cnt" in data:
-            self.label_lora_fsat2a_pkt_cnt.set_text(str(int(data["lora_fsat2a_pkt_cnt"])))
-
-        if "lora_fsat2a_temp" in data:
-            self.label_lora_fsat2a_temp.set_text(str(float(data["lora_fsat2a_temp"])) + " " + "°C")
-
-        if "lora_fsat2a_rssi" in data:
-            self.label_lora_fsat2a_rssi.set_text(str(int(data["lora_fsat2a_rssi"])) + " " + "dB")
-
-        if "lora_fsat2a_snr" in data:
-            self.label_lora_fsat2a_snr.set_text(str(float(data["lora_fsat2a_snr"])) + " " + "dB")
-
-        if "lora_fsat2a_freq_err" in data:
-            self.label_lora_fsat2a_freq_err.set_text(str(float(data["lora_fsat2a_freq_err"])) + " " + "Hz")
-
-        if "lora_fsat2b_sat_id" in data:
-            self.label_lora_fsat2b_id.set_text(str(int(data["lora_fsat2b_sat_id"])))
-
-        if "lora_fsat2b_pkt_cnt" in data:
-            self.label_lora_fsat2b_pkt_cnt.set_text(str(int(data["lora_fsat2b_pkt_cnt"])))
-
-        if "lora_fsat2b_temp" in data:
-            self.label_lora_fsat2b_temp.set_text(str(float(data["lora_fsat2b_temp"])) + " " + "°C")
-
-        if "lora_fsat2b_rssi" in data:
-            self.label_lora_fsat2b_rssi.set_text(str(int(data["lora_fsat2b_rssi"])) + " " + "dB")
-
-        if "lora_fsat2b_snr" in data:
-            self.label_lora_fsat2b_snr.set_text(str(float(data["lora_fsat2b_snr"])) + " " + "dB")
-
-        if "lora_fsat2b_freq_err" in data:
-            self.label_lora_fsat2b_freq_err.set_text(str(int(data["lora_fsat2b_freq_err"])) + " " + "Hz")
-
-        if "lora_fsat2b_bat_volt" in data:
-            self.label_lora_fsat2b_bat_volt.set_text(str(int(data["lora_fsat2b_bat_volt"])) + " " + "mV")
+            self._database.write("ttc_radio1_temp", "float", str(float(data["ttc_radio1_temp"])), "°C")
 
         if "lora_fsat2a_ts" in data:
             self.label_lora_fsat2a_ts.set_text(data["lora_fsat2a_ts"])
             self.label_lora_fsat2b_ts.set_text(data["lora_fsat2a_ts"])
+            self._database.set_timestamp(datetime.datetime.strptime(data["lora_fsat2a_ts"], '%Y/%m/%d - %H:%M:%S'))
+            self._database.write("lora_fsat2a_ts", "string", data["lora_fsat2a_ts"], "")
+
+        if "lora_fsat2a_sat_id" in data:
+            self.label_lora_fsat2a_id.set_text(str(int(data["lora_fsat2a_sat_id"])))
+            self._database.write("lora_fsat2a_sat_id", "uint8", str(int(data["lora_fsat2a_sat_id"])), "")
+
+        if "lora_fsat2a_pkt_cnt" in data:
+            self.label_lora_fsat2a_pkt_cnt.set_text(str(int(data["lora_fsat2a_pkt_cnt"])))
+            self._database.write("lora_fsat2a_pkt_cnt", "uint32", str(int(data["lora_fsat2a_pkt_cnt"])), "")
+
+        if "lora_fsat2a_temp" in data:
+            self.label_lora_fsat2a_temp.set_text(str(float(data["lora_fsat2a_temp"])) + " " + "°C")
+            self._database.write("lora_fsat2a_temp", "float", str(float(data["lora_fsat2a_temp"])), "°C")
+
+        if "lora_fsat2a_rssi" in data:
+            self.label_lora_fsat2a_rssi.set_text(str(int(data["lora_fsat2a_rssi"])) + " " + "dB")
+            self._database.write("lora_fsat2a_rssi", "int16", str(int(data["lora_fsat2a_rssi"])), "dB")
+
+        if "lora_fsat2a_snr" in data:
+            self.label_lora_fsat2a_snr.set_text(str(float(data["lora_fsat2a_snr"])) + " " + "dB")
+            self._database.write("lora_fsat2a_snr", "float", str(float(data["lora_fsat2a_snr"])), "dB")
+
+        if "lora_fsat2a_freq_err" in data:
+            self.label_lora_fsat2a_freq_err.set_text(str(float(data["lora_fsat2a_freq_err"])) + " " + "Hz")
+            self._database.write("lora_fsat2a_freq_err", "int16", str(float(data["lora_fsat2a_freq_err"])), "Hz")
+
+        if "lora_fsat2b_sat_id" in data:
+            self.label_lora_fsat2b_id.set_text(str(int(data["lora_fsat2b_sat_id"])))
+            self._database.write("lora_fsat2b_sat_id", "uint8", str(int(data["lora_fsat2b_sat_id"])), "")
+
+        if "lora_fsat2b_pkt_cnt" in data:
+            self.label_lora_fsat2b_pkt_cnt.set_text(str(int(data["lora_fsat2b_pkt_cnt"])))
+            self._database.write("lora_fsat2b_pkt_cnt", "uint32", str(int(data["lora_fsat2b_pkt_cnt"])), "")
+
+        if "lora_fsat2b_temp" in data:
+            self.label_lora_fsat2b_temp.set_text(str(float(data["lora_fsat2b_temp"])) + " " + "°C")
+            self._database.write("lora_fsat2b_temp", "float", str(float(data["lora_fsat2b_temp"])), "°C")
+
+        if "lora_fsat2b_rssi" in data:
+            self.label_lora_fsat2b_rssi.set_text(str(int(data["lora_fsat2b_rssi"])) + " " + "dB")
+            self._database.write("lora_fsat2b_rssi", "int16", str(int(data["lora_fsat2b_rssi"])), "dB")
+
+        if "lora_fsat2b_snr" in data:
+            self.label_lora_fsat2b_snr.set_text(str(float(data["lora_fsat2b_snr"])) + " " + "dB")
+            self._database.write("lora_fsat2b_snr", "float", str(float(data["lora_fsat2b_snr"])), "dB")
+
+        if "lora_fsat2b_freq_err" in data:
+            self.label_lora_fsat2b_freq_err.set_text(str(int(data["lora_fsat2b_freq_err"])) + " " + "Hz")
+            self._database.write("lora_fsat2b_freq_err", "int16", str(int(data["lora_fsat2b_freq_err"])), "Hz")
+
+        if "lora_fsat2b_bat_volt" in data:
+            self.label_lora_fsat2b_bat_volt.set_text(str(int(data["lora_fsat2b_bat_volt"])) + " " + "mV")
+            self._database.write("lora_fsat2b_bat_volt", "uint16", str(int(data["lora_fsat2b_bat_volt"])), "mV")
 
     def _load_default_values_eps(self):
         self.label_eps_mcu_date.set_text("1970/01/01")
