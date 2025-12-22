@@ -286,17 +286,18 @@ class FSat2ATV:
         data = json.loads(pkt_json)
 
         if "eps_timestamp" in data:
-            self.label_eps_mcu_date.set_text(data["eps_timestamp"][:12])
-            self.label_eps_mcu_time.set_text(data["eps_timestamp"][12:])
+            self.label_eps_mcu_date.set_text(data["eps_timestamp"][:10])
+            self.label_eps_mcu_time.set_text(data["eps_timestamp"][10:])
             self._database.set_timestamp(datetime.datetime.strptime(data["eps_timestamp"], '%Y/%m/%d - %H:%M:%S'))
             self._database.write("eps_timestamp", "string", data["eps_timestamp"])
 #            self.label_eps_mcu_time.override_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0, 1, 0, 1))
-#        else:
+        else:
 #            self.label_eps_mcu_time.override_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0, 0, 0, 1))
+            self._database.set_timestamp(datetime.datetime.strptime(data["obdh_timestamp"], '%Y/%m/%d - %H:%M:%S'))
 
         if "eps_mcu_temp" in data:
-            self.label_eps_mcu_temp.set_text(str((int(data["eps_mcu_temp"]) - 273)) + " " + "°C")
-            self._database.write("eps_mcu_temp", "int16", int(data["eps_mcu_temp"]) - 273, "°C")
+            self.label_eps_mcu_temp.set_text(str(int(data["eps_mcu_temp"]) - 273) + " " + "°C")
+            self._database.write("eps_mcu_temp", "int16", str(int(data["eps_mcu_temp"]) - 273), "°C")
 
         if "eps_mcu_curr" in data:
             self.label_eps_mcu_curr.set_text(data["eps_mcu_curr"] + " " + "mA")
@@ -429,15 +430,15 @@ class FSat2ATV:
 
         if "eps_bat_curr" in data:
             self.label_eps_bat_curr.set_text(data["eps_bat_curr"] + " " + "mA")
-            self._database.write("", "uint16", data["eps_bat_curr"], "mA")
+            self._database.write("eps_bat_curr", "int16", data["eps_bat_curr"], "mA")
 
         if "eps_bat_avg_curr" in data:
             self.label_eps_bat_average_curr.set_text(data["eps_bat_avg_curr"] + " " + "mA")
             self._database.write("eps_bat_avg_curr", "uint16", data["eps_bat_avg_curr"], "mA")
 
         if "eps_bat_acc_curr" in data:
-            self.label_eps_bat_acc_curr.set_text(data["eps_bat_acc_curr"] + " " + "mA")
-            self._database.write("eps_bat_acc_curr", "uint16", data["eps_bat_acc_curr"], "mA")
+            self.label_eps_bat_acc_curr.set_text(data["eps_bat_acc_curr"] + " " + "mAh")
+            self._database.write("eps_bat_acc_curr", "uint16", data["eps_bat_acc_curr"], "mAh")
 
         if "eps_bat_charge" in data:
             self.label_eps_bat_charge.set_text(data["eps_bat_charge"] + " " + "mAh")
@@ -475,14 +476,14 @@ class FSat2ATV:
 
         if "eps_bat_mon_temp" in data:
             self.label_eps_bat_temp_monitor.set_text(str(int(data["eps_bat_mon_temp"]) - 273) + " " + "°C")
-            self._database.write("", "uint16", str(int(data["eps_bat_mon_temp"]) - 273), "°C ")
+            self._database.write("eps_bat_mon_temp", "uint16", str(int(data["eps_bat_mon_temp"]) - 273), "°C")
 
 #        if "eps_main_pwr_bus_volt" in data:
 #            self..set_text(data["eps_main_pwr_bus_volt"] + " " + "mV")
 
         if "obdh_timestamp" in data:
-            self.label_obdh_mcu_date.set_text(data["obdh_timestamp"][:12])
-            self.label_obdh_mcu_time.set_text(data["obdh_timestamp"][12:])
+            self.label_obdh_mcu_date.set_text(data["obdh_timestamp"][:10])
+            self.label_obdh_mcu_time.set_text(data["obdh_timestamp"][10:])
             self._database.set_timestamp(datetime.datetime.strptime(data["obdh_timestamp"], '%Y/%m/%d - %H:%M:%S'))
             self._database.write("obdh_timestamp", "string", data["obdh_timestamp"], "")
 
@@ -542,8 +543,8 @@ class FSat2ATV:
             self._database.write("obdh_pos_alt", "uint16", data["obdh_pos_alt"], "km")
 
         if "obdh_pos_ts" in data:
-            self.label_obdh_position_date.set_text(data["obdh_pos_ts"][:12])
-            self.label_obdh_position_time.set_text(data["obdh_pos_ts"][12:])
+            self.label_obdh_position_date.set_text(data["obdh_pos_ts"][:10])
+            self.label_obdh_position_time.set_text(data["obdh_pos_ts"][10:])
             self._database.write("obdh_pos_ts", "string", data["obdh_pos_ts"], "")
 
         if "obdh_pos_tle_line_1" in data:
@@ -555,8 +556,8 @@ class FSat2ATV:
             self._database.write("obdh_pos_tle_line_2", "string", data["obdh_pos_tle_line_2"], "")
 
         if "obdh_pos_last_tle_upd_ts" in data:
-            self.label_obdh_position_date.set_text(data["obdh_pos_last_tle_upd_ts"][:12])
-            self.label_obdh_position_time.set_text(data["obdh_pos_last_tle_upd_ts"][12:])
+            self.label_obdh_position_date.set_text(data["obdh_pos_last_tle_upd_ts"][:10])
+            self.label_obdh_position_time.set_text(data["obdh_pos_last_tle_upd_ts"][10:])
             self._database.write("obdh_pos_last_tle_upd_ts", "string", data["obdh_pos_last_tle_upd_ts"], "")
 
         if "obdh_op_last_val_tc" in data:
@@ -578,8 +579,8 @@ class FSat2ATV:
                 self._database.write("obdh_op_mode", "string", "Unknown", "")
 
         if "obdh_op_last_mode_change_ts" in data:
-            self.label_obdh_op_date_last_mode_change.set_text(data["obdh_op_last_mode_change_ts"][:12])
-            self.label_obdh_op_time_last_mode_change.set_text(data["obdh_op_last_mode_change_ts"][12:])
+            self.label_obdh_op_date_last_mode_change.set_text(data["obdh_op_last_mode_change_ts"][:10])
+            self.label_obdh_op_time_last_mode_change.set_text(data["obdh_op_last_mode_change_ts"][10:])
             self._database.write("obdh_op_last_mode_change_ts", "string", data["obdh_op_last_mode_change_ts"], "")
 
         if "obdh_op_mode_dur" in data:
@@ -632,8 +633,8 @@ class FSat2ATV:
                 self._database.write("obdh_op_pl_main_state", "string", "Enabled", "")
 
         if "obdh_op_last_reading_ts" in data:
-            self.label_obdh_op_date_last_reading.set_text(data["obdh_op_last_reading_ts"][:12])
-            self.label_obdh_op_date_last_reading.set_text(data["obdh_op_last_reading_ts"][12:])
+            self.label_obdh_op_date_last_reading.set_text(data["obdh_op_last_reading_ts"][:10])
+            self.label_obdh_op_date_last_reading.set_text(data["obdh_op_last_reading_ts"][10:])
             self._database.write("obdh_op_last_reading_ts", "string", data["obdh_op_last_reading_ts"], "")
 
         if "obdh_op_remaining_hib_time" in data:
@@ -641,18 +642,18 @@ class FSat2ATV:
             self._database.write("obdh_op_remaining_hib_time", "uint16", data["obdh_op_remaining_hib_time"], "min")
 
         if "obdh_last_valid_tc_rssi" in data:
-            self.label_obdh_op_date_last_reading.set_text(data["obdh_last_valid_tc_rssi"][:12])
-            self.label_obdh_op_time_last_reading.set_text(data["obdh_last_valid_tc_rssi"][12:])
-            self._database.write("obdh_last_valid_tc_rssi", "string", data["obdh_last_valid_tc_rssi"], "")
+            self.label_obdh_op_date_last_reading.set_text(data["obdh_last_valid_tc_rssi"][:10])
+            self.label_obdh_op_time_last_reading.set_text(data["obdh_last_valid_tc_rssi"][10:])
+            self._database.write("obdh_last_valid_tc_rssi", "int16", data["obdh_last_valid_tc_rssi"], "dB")
 
         if "obdh_sensor_read_ts" in data:
-            self.label_obdh_op_date_last_reading.set_text(data["obdh_sensor_read_ts"][:12])
-            self.label_obdh_op_time_last_reading.set_text(data["obdh_sensor_read_ts"][12:])
+            self.label_obdh_op_date_last_reading.set_text(data["obdh_sensor_read_ts"][:10])
+            self.label_obdh_op_time_last_reading.set_text(data["obdh_sensor_read_ts"][10:])
             self._database.write("obdh_sensor_read_ts", "string", data["obdh_sensor_read_ts"], "")
 
         if "ttc_radio1_temp" in data:
             self.label_ttc_radio2_temp.set_text(str(float(data["ttc_radio1_temp"])) + " " + "°C")
-            self._database.write("ttc_radio1_temp", "float", str(float(data["ttc_radio1_temp"])), "°C ")
+            self._database.write("ttc_radio1_temp", "float", str(float(data["ttc_radio1_temp"])), "°C")
 
         if "lora_fsat2a_ts" in data:
             self.label_lora_fsat2a_ts.set_text(data["lora_fsat2a_ts"])
@@ -670,7 +671,7 @@ class FSat2ATV:
 
         if "lora_fsat2a_temp" in data:
             self.label_lora_fsat2a_temp.set_text(str(float(data["lora_fsat2a_temp"])) + " " + "°C")
-            self._database.write("lora_fsat2a_temp", "float", str(float(data["lora_fsat2a_temp"])), "°C ")
+            self._database.write("lora_fsat2a_temp", "float", str(float(data["lora_fsat2a_temp"])), "°C")
 
         if "lora_fsat2a_rssi" in data:
             self.label_lora_fsat2a_rssi.set_text(str(int(data["lora_fsat2a_rssi"])) + " " + "dB")
@@ -694,7 +695,7 @@ class FSat2ATV:
 
         if "lora_fsat2b_temp" in data:
             self.label_lora_fsat2b_temp.set_text(str(float(data["lora_fsat2b_temp"])) + " " + "°C")
-            self._database.write("lora_fsat2b_temp", "float", str(float(data["lora_fsat2b_temp"])), "°C ")
+            self._database.write("lora_fsat2b_temp", "float", str(float(data["lora_fsat2b_temp"])), "°C")
 
         if "lora_fsat2b_rssi" in data:
             self.label_lora_fsat2b_rssi.set_text(str(int(data["lora_fsat2b_rssi"])) + " " + "dB")
